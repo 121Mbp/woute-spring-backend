@@ -202,4 +202,4 @@ public class FeedService {
         LikeEntity unlike = likeRepository.findById(likeId).orElseThrow();
         likeRepository.delete(unlike);
     }
-}
+} 

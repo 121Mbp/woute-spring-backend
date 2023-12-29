@@ -26,7 +26,7 @@ public class FeedController {
 
     @Operation(summary = "피드 상세페이지")
     @GetMapping("/p/{id}")
-    public CourseResponse getCourseList(@PathVariable Long id) {
+    public CourseResponse getCourseList(@PathVariable("id") Long id) {
         return feedService.courseList(id);
     }
 
@@ -43,25 +43,25 @@ public class FeedController {
 
     @Operation(summary = "피드 수정")
     @PutMapping("/p/{id}")
-    public void modifyFeedPost(@PathVariable Long id, @RequestBody FeedRequest request) {
+    public void modifyFeedPost(@PathVariable("id") Long id, @RequestBody FeedRequest request) {
         feedService.modifyFeed(id, request);
     }
 
     @Operation(summary = "피드 삭제")
     @DeleteMapping("/p/{id}")
-    public void deleteFeedPost(@PathVariable Long id) {
+    public void deleteFeedPost(@PathVariable("id") Long id) {
         feedService.deleteFeed(id);
     }
 
     @Operation(summary = "좋아요")
     @PutMapping("/p/{id}/like")
-    public void likeFeedPost(@PathVariable Long id, @RequestBody LikeRequest request) {
+    public void likeFeedPost(@PathVariable("id") Long id, @RequestBody LikeRequest request) {
         feedService.likeFeed(id, request);
     }
 
     @Operation(summary = "좋아요 취소")
     @PutMapping("/p/{id}/like/{likeId}")
-    public void unlikeFeedPost(@PathVariable Long id, @PathVariable Long likeId, @RequestBody LikeRequest request) {
+    public void unlikeFeedPost(@PathVariable("id") Long id, @PathVariable("likeId") Long likeId, @RequestBody LikeRequest request) {
         feedService.unlikeFeed(id, likeId, request);
     }
 }
