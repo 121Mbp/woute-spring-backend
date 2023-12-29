@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CourseRequest {
+    private String code;
     private String store;
     private String address;
     private String phone;

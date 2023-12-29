@@ -20,6 +20,7 @@ public class CourseEntity {
     @SequenceGenerator(name = "w_course_seq", sequenceName = "w_course_SEQ", allocationSize = 1)
     private Long id;
     private Long feedId;
+    private String code;
     private String store;
     private String address;
     private String phone;
