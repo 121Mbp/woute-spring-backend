@@ -17,11 +17,11 @@ public class FeedRequest {
     private String type;
     private String title;
     private String content;
-    private String hashtag;
     private int heartCount;
     private ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
 
+    private List<TagsRequest> tags;
     private List<CourseRequest> course;
     private List<AttachRequest> attach;
 }
