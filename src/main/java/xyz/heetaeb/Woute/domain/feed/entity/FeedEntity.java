@@ -25,15 +25,13 @@ public class FeedEntity {
     private String type;
     private String title;
     private String content;
-    private String hashtag;
     private Integer heartCount;
     private ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
 
-    public void changeFeedAndCourse(String title, String content, String hashtag) {
+    public void changeFeedAndCourse(String title, String content) {
         this.title = title;
         this.content = content;
-        this.hashtag = hashtag;
         this.updatedAt = ZonedDateTime.now();
     }
 

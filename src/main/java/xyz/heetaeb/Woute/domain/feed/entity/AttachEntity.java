@@ -7,14 +7,22 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "w_attach")
 public class AttachEntity {
     @Id
-    @Builder.Default
-    private String uuid = UUID.randomUUID().toString();
+    private String uuid;
     private Long feedId;
     private String origin;
+    private String type;
+    private String filePath;
+
+    @Builder
+    public AttachEntity(String uuid, Long feedId, String origin, String type, String filePath) {
+        this.uuid = uuid;
+        this.feedId = feedId;
+        this.origin = origin;
+        this.type = type;
+        this.filePath = filePath;
+    }
 }

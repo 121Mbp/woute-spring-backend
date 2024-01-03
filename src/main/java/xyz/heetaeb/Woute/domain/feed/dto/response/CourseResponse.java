@@ -10,7 +10,6 @@ import java.util.List;
 
 @Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class CourseResponse {
     private Long id;
@@ -25,12 +24,14 @@ public class CourseResponse {
     private ZonedDateTime updatedAt;
     private List<Course> courses;
     private List<Attach> attaches;
+    private List<Tag> tags;
 
     @Getter
     @Builder
     @AllArgsConstructor
     public static class Course {
         private Long id;
+        private String code;
         private String store;
         private String address;
         private String phone;
@@ -43,8 +44,18 @@ public class CourseResponse {
     @Getter
     @Builder
     @AllArgsConstructor
+    public static class Tag {
+        private Long id;
+        private String words;
+    }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
     public static class Attach {
         private String uuid;
         private String origin;
+        private String type;
+        private String filePath;
     }
 }
