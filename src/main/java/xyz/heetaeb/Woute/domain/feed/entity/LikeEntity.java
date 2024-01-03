@@ -23,5 +23,6 @@ public class LikeEntity {
     private Long feedId;
     private String nickname;
     private String profileImage;
+    private boolean state;
     private ZonedDateTime createdAt;
 }
