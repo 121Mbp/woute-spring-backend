@@ -10,7 +10,6 @@ import xyz.heetaeb.Woute.domain.feed.dto.request.LikeRequest;
 import xyz.heetaeb.Woute.domain.feed.dto.request.TagsRequest;
 import xyz.heetaeb.Woute.domain.feed.dto.response.CourseResponse;
 import xyz.heetaeb.Woute.domain.feed.dto.response.FeedResponse;
-import xyz.heetaeb.Woute.domain.feed.dto.response.TagsResponse;
 import xyz.heetaeb.Woute.domain.feed.entity.*;
 import xyz.heetaeb.Woute.domain.feed.repository.*;
 
@@ -40,6 +39,7 @@ public class FeedService {
             Long feedId = post.getId();
             List<AttachEntity> attaches = attachRepository.findAllByFeedId(feedId);
             List<TagsEntity> hashtags = tagsRepository.findAllByFeedId(feedId);
+            List<LikeEntity> likes = likeRepository.findAllByFeedId(feedId);
             return FeedResponse.builder()
                     .id(post.getId())
                     .nickname(post.getNickname())
@@ -64,6 +64,14 @@ public class FeedService {
                                     .filePath(attach.getFilePath())
                                     .build()).toList()
                     )
+                    .likes(
+                            likes.stream().map(like -> FeedResponse.Like.builder()
+                                    .id(like.getId())
+                                    .userId(like.getUserId())
+                                    .nickname(like.getNickname())
+                                    .profileImage(like.getProfileImage())
+                                    .build()).toList()
+                    )
                     .build();
         }).toList();
     }
@@ -74,7 +82,6 @@ public class FeedService {
         List<TagsEntity> hashtags = tagsRepository.findAllByFeedId(feedId);
         List<CourseEntity> courses = courseRepository.findAllByFeedId(feedId);
         List<AttachEntity> attaches = attachRepository.findAllByFeedId(feedId);
-
         return CourseResponse.builder()
                 .id(feed.getId())
                 .nickname(feed.getNickname())
@@ -82,7 +89,6 @@ public class FeedService {
                 .type(feed.getType())
                 .title(feed.getTitle())
                 .content(feed.getContent())
-                .heartCount(feed.getHeartCount())
                 .createdAt(feed.getCreatedAt())
                 .updatedAt(feed.getUpdatedAt())
                 .tags(
@@ -117,6 +123,7 @@ public class FeedService {
                 ).build();
     }
 
+    // 첨부 파일
     public byte[] downloadImageSystem(String id) throws IOException {
         List<AttachEntity> attaches = attachRepository.findByUuid(id);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -137,7 +144,6 @@ public class FeedService {
             List<TagsRequest> requestTags,
             List<MultipartFile> flies
     ) {
-        System.out.println(requestFeed.getTitle());
         FeedEntity feed = FeedEntity.builder()
                 .userId(requestFeed.getUserId())
                 .nickname(requestFeed.getNickname())
@@ -210,62 +216,81 @@ public class FeedService {
         }).collect(Collectors.toList());
     }
 
+    // 피드 수정
     @Transactional
-    public void modifyFeed(Long feedId, FeedRequest request) {
+    public void modifyFeed(
+            Long feedId, FeedRequest requestFeed,
+            List<CourseRequest> requestCourses,
+            List<TagsRequest> requestTags
+    ) {
         FeedEntity feed = feedRepository.findById(feedId).orElseThrow();
         feed.changeFeedAndCourse(
-                request.getTitle(),
-                request.getContent()
+                requestFeed.getTitle(),
+                requestFeed.getContent()
         );
         feedRepository.save(feed);
 
-        List<CourseEntity> course = courseRepository.findAllByFeedId(feedId);
-        courseRepository.deleteAll(course);
-        List<AttachEntity> attach = attachRepository.findAllByFeedId(feedId);
-        attachRepository.deleteAll(attach);
+        List<CourseEntity> courses = courseRepository.findAllByFeedId(feedId);
+        courseRepository.deleteAll(courses);
+        List<TagsEntity> tags = tagsRepository.findAllByFeedId(feedId);
+        tagsRepository.deleteAll(tags);
 
-        request.getCourse().forEach(places -> {
-            CourseEntity courses = CourseEntity.builder()
-                    .feedId(feed.getId())
-                    .code(places.getCode())
-                    .store(places.getStore())
-                    .address(places.getAddress())
-                    .phone(places.getPhone())
-                    .homepage(places.getHomepage())
-                    .category(places.getCategory())
-                    .latitude(places.getLatitude())
-                    .longitude(places.getLongitude())
-                    .build();
-            courseRepository.save(courses);
+        requestCourses.forEach(course -> {
+            try {
+                CourseEntity courseEntity = courseRepository.save(
+                        CourseEntity.builder()
+                                .feedId(feed.getId())
+                                .code(course.getCode())
+                                .store(course.getStore())
+                                .address(course.getAddress())
+                                .phone(course.getPhone())
+                                .homepage(course.getHomepage())
+                                .category(course.getCategory())
+                                .latitude(course.getLatitude())
+                                .longitude(course.getLongitude())
+                                .build()
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
 
-        request.getAttach().forEach(images -> {
-            AttachEntity attaches = AttachEntity.builder()
-                    .feedId(feed.getId())
-                    .origin(images.getOrigin())
-                    .build();
-            attachRepository.save(attaches);
+        requestTags.forEach(tag -> {
+            try {
+                TagsEntity tagsEntity = tagsRepository.save(
+                        TagsEntity.builder()
+                                .feedId(feed.getId())
+                                .words(tag.getWords())
+                                .build()
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     }
 
+    // 피드 삭제
     @Transactional
     public void deleteFeed(Long feedId) {
         FeedEntity feed = feedRepository.findById(feedId).orElseThrow();
         feedRepository.delete(feed);
         List<CourseEntity> courses = courseRepository.findAllByFeedId(feedId);
         courseRepository.deleteAll(courses);
+        List<TagsEntity> tags = tagsRepository.findAllByFeedId(feedId);
+        tagsRepository.deleteAll(tags);
         List<AttachEntity> attaches = attachRepository.findAllByFeedId(feedId);
         attachRepository.deleteAll(attaches);
     }
 
+    // 좋아요
     @Transactional
     public void likeFeed(Long feedId, LikeRequest request) {
         FeedEntity feed = feedRepository.findById(feedId).orElseThrow();
         int increase = feed.getHeartCount() + 1;
         feed.changeFeedLike(increase);
         feedRepository.save(feed);
-
         LikeEntity like = LikeEntity.builder()
+                .feedId(feed.getId())
                 .nickname(request.getNickname())
                 .profileImage(request.getProfileImage())
                 .createdAt(ZonedDateTime.now())
@@ -273,8 +298,9 @@ public class FeedService {
         likeRepository.save(like);
     }
 
+    // 좋아요 취소
     @Transactional
-    public void unlikeFeed(Long feedId, Long likeId, LikeRequest request) {
+    public void unlikeFeed(Long feedId, Long likeId) {
         FeedEntity feed = feedRepository.findById(feedId).orElseThrow();
         int decrease = feed.getHeartCount() - 1;
         feed.changeFeedLike(decrease);
@@ -282,5 +308,4 @@ public class FeedService {
         LikeEntity unlike = likeRepository.findById(likeId).orElseThrow();
         likeRepository.delete(unlike);
     }
-
 }

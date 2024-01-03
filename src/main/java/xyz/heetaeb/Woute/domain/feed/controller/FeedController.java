@@ -64,8 +64,13 @@ public class FeedController {
 
     @Operation(summary = "피드 수정")
     @PutMapping("/p/{id}")
-    public void modifyFeedPost(@PathVariable Long id, @RequestBody FeedRequest request) {
-        feedService.modifyFeed(id, request);
+    public void modifyFeedPost(
+            @PathVariable Long id,
+            @RequestBody FeedRequest requestFeed,
+            @RequestPart(value = "courses", required = false) List<CourseRequest> requestCourses,
+            @RequestPart(value = "tags", required = false) List<TagsRequest> requestTags
+    ) {
+        feedService.modifyFeed(id, requestFeed, requestCourses, requestTags);
     }
 
     @Operation(summary = "피드 삭제")
@@ -75,15 +80,15 @@ public class FeedController {
     }
 
     @Operation(summary = "좋아요")
-    @PutMapping("/p/{id}/like")
-    public void likeFeedPost(@PathVariable Long id, @RequestBody LikeRequest request) {
-        feedService.likeFeed(id, request);
+    @PutMapping("/p/{feedId}/like")
+    public void likeFeedPost(@PathVariable Long feedId, @RequestBody LikeRequest request) {
+        feedService.likeFeed(feedId, request);
     }
 
     @Operation(summary = "좋아요 취소")
-    @PutMapping("/p/{id}/like/{likeId}")
-    public void unlikeFeedPost(@PathVariable Long id, @PathVariable Long likeId, @RequestBody LikeRequest request) {
-        feedService.unlikeFeed(id, likeId, request);
+    @DeleteMapping("/p/{feedId}/like/{likeId}")
+    public void unlikeFeedPost(@PathVariable Long feedId, @PathVariable Long likeId) {
+        feedService.unlikeFeed(feedId, likeId);
     }
 
 }
