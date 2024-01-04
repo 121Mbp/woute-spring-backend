@@ -74,6 +74,8 @@ public class FeedService {
             List<AttachEntity> attaches = attachRepository.findAllByFeedId(feedId);
             List<TagsEntity> hashtags = tagsRepository.findAllByFeedId(feedId);
             List<LikeEntity> likes = likeRepository.findAllByFeedId(feedId);
+            List<ReplyEntity> reply = replyRepository.findByFeedId(feedId);
+            int replyCount = reply.size();
             return FeedResponse.builder()
                     .id(post.getId())
                     .userId(post.getUserId())
@@ -107,6 +109,7 @@ public class FeedService {
                                     .profileImage(like.getProfileImage())
                                     .build()).toList()
                     )
+                    .replyCount(replyCount)
                     .build();
         }).toList();
     }
