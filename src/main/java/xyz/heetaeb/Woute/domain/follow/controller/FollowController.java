@@ -6,14 +6,14 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.transaction.Transactional;
 import xyz.heetaeb.Woute.domain.follow.dto.RequestDTO;
 import xyz.heetaeb.Woute.domain.follow.dto.SimpleFollowerListDTO;
 import xyz.heetaeb.Woute.domain.follow.dto.SimpleFollowingListDTO;
@@ -26,6 +26,7 @@ public class FollowController {
     private final FollowService followService;
 
     @PostMapping("/follow")
+    @Transactional
     public ResponseEntity<String> follow(@RequestBody RequestDTO dto) {
         try {
         	System.out.println("성공");
@@ -53,7 +54,7 @@ public class FollowController {
     	followService.unFollow(id);
     }
     
-    @GetMapping("/{id}/follower/search")
+    @PostMapping("/{id}/follower/search")
     public List<SimpleFollowerListDTO> searchFollower(@PathVariable("id") Long userid, @RequestBody RequestDTO dto) {
     	return followService.searchFollower(userid, dto.getNickname());
     }
