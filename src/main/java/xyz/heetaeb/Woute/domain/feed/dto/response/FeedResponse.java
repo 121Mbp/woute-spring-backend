@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class FeedResponse {
     private Long id;
+    private Long userId;
     private String nickname;
     private String profileImage;
     private String type;
