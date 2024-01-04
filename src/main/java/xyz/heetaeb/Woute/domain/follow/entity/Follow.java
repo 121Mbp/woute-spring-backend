@@ -12,8 +12,7 @@ import java.util.stream.Stream;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "w_follows")
-@Entity
+@Entity(name = "w_follows")
 public class Follow {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "follow_seq")

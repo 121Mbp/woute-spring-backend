@@ -2,7 +2,6 @@ package xyz.heetaeb.Woute.domain.follow.service;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.heetaeb.Woute.domain.follow.dto.RequestDTO;
@@ -12,6 +11,7 @@ import xyz.heetaeb.Woute.domain.follow.entity.Follow;
 import xyz.heetaeb.Woute.domain.follow.entity.User;
 import xyz.heetaeb.Woute.domain.follow.repository.FollowRepository;
 import xyz.heetaeb.Woute.domain.follow.repository.UserRepository;
+import xyz.heetaeb.Woute.domain.notification.service.NotiService;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -21,15 +21,17 @@ import java.util.List;
 public class FollowService {
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
+    private final NotiService notiService;
+    
     // 팔로우
     @Transactional
     public void createFollow(RequestDTO dto) {
         User followingUser = userRepository.findById(dto.getFollowingId())
-        		.orElseThrow(()-> new RuntimeException("팔로잉유저가 없습니다"));
+        		.orElseThrow();
         User followerUser = userRepository.findById(dto.getFollowerId())
-        		.orElseThrow(()-> new RuntimeException("팔로워유저가 없습니다"));
+        		.orElseThrow();
         
-        	if(followRepository.countByFollowingIdAndFollowerId(followerUser.getId(), followingUser.getId()) == 1) {
+        	if(followRepository.countByFollowingIdAndFollowerId(dto.getFollowerId(), dto.getFollowingId()) == 1) {
         		Follow fromFollow = followRepository.findByFollowingIdAndFollowerId(followerUser.getId(), followingUser.getId());
         		fromFollow  = Follow.builder()
         				.id(fromFollow.getId())
@@ -40,13 +42,19 @@ public class FollowService {
         				.build();
         		followRepository.save(fromFollow);
         		
-        		Follow toofollow = Follow.builder()
+        		Follow tooFollow = Follow.builder()
         				.following(followingUser)
         				.follower(followerUser)
         				.followState(true)
         				.createdAt(ZonedDateTime.now())
         				.build();
-        		followRepository.save(toofollow);
+        		followRepository.save(tooFollow);
+        		
+        		notiService.send(tooFollow.getFollower().getId(),
+        				tooFollow.getFollowing().getNickName(),
+        				tooFollow.getFollowing().getProfileImg(),
+        				"님이 팔로우 했습니다",
+        				"/users/" + tooFollow.getFollowing().getId());
         	} else {
         		Follow follow = Follow.builder()
         				.following(followingUser)
@@ -55,6 +63,12 @@ public class FollowService {
         				.createdAt(ZonedDateTime.now())
         				.build();
         		followRepository.save(follow);
+        		notiService.send(
+        				follow.getFollower().getId(),
+        				follow.getFollowing().getNickName(),
+        				follow.getFollowing().getProfileImg(), 
+        				"님이 팔로우 했습니다", 
+        				"/users/" + follow.getFollowing().getId());
         	}
     }
     
@@ -112,29 +126,52 @@ public class FollowService {
     public List<SimpleFollowerListDTO> searchFollower(Long userid, String nickname) {
     	List<Follow> followers = followRepository.findByFollowerId(userid);
     	
-    	return followers.stream().filter(follower -> follower.getFollowing().getNickName().contains(nickname.trim()))
-		    	.map(f -> SimpleFollowerListDTO.builder()
-		    			.id(f.getId())
-		    			.followerId(f.getFollowing().getId())
-		    			.followerNick(f.getFollowing().getNickName())
-		    			.followerImg(f.getFollowing().getProfileImg())
-		    			.followState(f.isFollowState())
-		    			.CreatedAt(f.getCreatedAt())
-		    			.build()).toList();
+    	if(nickname.trim().equals("")) {
+    		return followers.stream().filter(follower -> follower.getFollowing().getNickName().contains("가"))
+    				.map(f -> SimpleFollowerListDTO.builder()
+    						.id(f.getId())
+    						.followerId(f.getFollowing().getId())
+    						.followerNick(f.getFollowing().getNickName())
+    						.followerImg(f.getFollowing().getProfileImg())
+    						.followState(f.isFollowState())
+    						.CreatedAt(f.getCreatedAt())
+    						.build()).toList();
+    	} else {
+        	return followers.stream().filter(follower -> follower.getFollowing().getNickName().contains(nickname.trim()))
+    		    	.map(f -> SimpleFollowerListDTO.builder()
+    		    			.id(f.getId())
+    		    			.followerId(f.getFollowing().getId())
+    		    			.followerNick(f.getFollowing().getNickName())
+    		    			.followerImg(f.getFollowing().getProfileImg())
+    		    			.followState(f.isFollowState())
+    		    			.CreatedAt(f.getCreatedAt())
+    		    			.build()).toList();
+    	}
     }
     
     // 팔로잉 검색
     public List<SimpleFollowingListDTO> searchFollowing(Long userid, String nickname) {
     	List<Follow> followings = followRepository.findByFollowingId(userid);
     	
+    	if(nickname.trim().equals("")) {
+    		return followings.stream().filter(following -> following.getFollower().getNickName().contains("가"))
+    				.map(f -> SimpleFollowingListDTO.builder()
+    						.id(f.getId())
+    						.followingId(f.getFollower().getId())
+    						.followingNick(f.getFollower().getNickName())
+    						.followingImg(f.getFollower().getProfileImg())
+    						.CreatedAt(f.getCreatedAt())
+    						.build()).toList();
+    	} else {
+    		return followings.stream().filter(following -> following.getFollower().getNickName().contains(nickname.trim()))
+    				.map(f -> SimpleFollowingListDTO.builder()
+    						.id(f.getId())
+    						.followingId(f.getFollower().getId())
+    						.followingNick(f.getFollower().getNickName())
+    						.followingImg(f.getFollower().getProfileImg())
+    						.CreatedAt(f.getCreatedAt())
+    						.build()).toList();
+    	}
     	
-    	return followings.stream().filter(following -> following.getFollower().getNickName().contains(nickname.trim()))
-		    	.map(f -> SimpleFollowingListDTO.builder()
-		    			.id(f.getId())
-		    			.followingId(f.getFollower().getId())
-		    			.followingNick(f.getFollower().getNickName())
-		    			.followingImg(f.getFollower().getProfileImg())
-		    			.CreatedAt(f.getCreatedAt())
-		    			.build()).toList();
     }
 }
