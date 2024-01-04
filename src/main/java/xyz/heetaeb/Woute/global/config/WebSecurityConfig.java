@@ -1,6 +1,9 @@
 package xyz.heetaeb.Woute.global.config;
 
 import lombok.RequiredArgsConstructor;
+import xyz.heetaeb.Woute.global.config.jwt.JwtSecurityConfig;
+import xyz.heetaeb.Woute.global.config.jwt.TokenProvider;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,7 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class WebSecurityConfig {
-
+	private final TokenProvider tokenProvider;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors().disable()
@@ -25,7 +28,9 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests()
 //                .requestMatchers("/status", "/v2/api-docs", "/swagger-ui/", "/images/", "/api/join", "/api/login").permitAll()
 //                .requestMatchers("/restaurants").authenticated()
-                .anyRequest().permitAll();
+                .anyRequest().permitAll()
+                .and().apply(new JwtSecurityConfig(tokenProvider));
+                
         return http.build();
     }
 
