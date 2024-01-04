@@ -25,6 +25,7 @@ public class FeedResponse {
     private List<Tag> tags;
     private List<Attach> attaches;
     private List<Like> likes;
+    private Integer replyCount;
 
     @Getter
     @Builder
