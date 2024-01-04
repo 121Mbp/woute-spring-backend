@@ -25,18 +25,14 @@ public class ReplyService {
 	private final ReplyLIkeRepository likeRepository;
 	
 	//댓글 목록 
-	public List<ReplyResponse> replyList(Long feed_id){
+	public List<ReplyResponse> replyList(Long feed_id) {
 		List<ReplyEntity> replys = replyRepository.findByFeedId(feed_id);
-		
-		return replys.stream().map((reply)-> ReplyResponse.builder()
-				.feed_id(2L)
-				.reply_id(reply.getId())
-				.nickname(reply.getNickname())
-				.profileImage(reply.getProfileImage())
-				.content(reply.getContent())
-				.createdAt(reply.getCreated_at())
-				.heartCount(reply.getHeartCount())
-				.build()).toList();
+
+		return replys.stream()
+				.map((reply) -> ReplyResponse.builder().feed_id(reply.getFeedId()).reply_id(reply.getId())
+						.nickname(reply.getNickname()).profileImage(reply.getProfileImage()).content(reply.getContent())
+						.createdAt(reply.getCreated_at()).heartCount(reply.getHeartCount()).build())
+				.toList();
 	}
 	//댓글 입력
 	@Transactional
