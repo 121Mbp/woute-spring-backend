@@ -67,7 +67,7 @@
 
 
 ## API 
-#### - [프로젝트 API](https://documenter.getpostman.com/view/29577486/2s9YsDmbHq#b4b6b309-0652-4f11-b792-d9fe46f86b6f)
+#### - [프로젝트 API](https://documenter.getpostman.com/view/29577486/2s9YsJBCTc)
 #### - [카카오 지도](https://apis.map.kakao.com/)
 
 
