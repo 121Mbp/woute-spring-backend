@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CourseResponse {
     private Long id;
+    private Long userId;
     private String nickname;
     private String profileImage;
     private String type;
