@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import xyz.heetaeb.Woute.domain.notification.NotiRespDTO;
+import xyz.heetaeb.Woute.domain.notification.dto.NotiRespDTO;
 import xyz.heetaeb.Woute.domain.notification.entity.Notification;
 import xyz.heetaeb.Woute.domain.notification.repository.EmitterRepository;
 import xyz.heetaeb.Woute.domain.notification.repository.NotiRepository;

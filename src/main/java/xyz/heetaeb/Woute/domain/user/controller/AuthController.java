@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import xyz.heetaeb.Woute.domain.follow.dto.UserResponseDTO;
 import xyz.heetaeb.Woute.domain.user.dto.TokenDto;
 import xyz.heetaeb.Woute.domain.user.dto.request.UpdateProfileRequest;
 import xyz.heetaeb.Woute.domain.user.dto.request.UserLog;
@@ -61,10 +62,15 @@ public class AuthController {
  
    @Operation(summary = "토큰 유저정보")
    @PostMapping("/userinfosave")
-   public ResponseEntity<UserEntity> userInfoSave(@RequestParam Long id) {
+   public ResponseEntity<UserEntity> userInfoSave(@RequestParam("id") Long id) {
        System.out.println("토큰에 있는 id: " + id);
        System.out.println(authService.findById(id));
        return ResponseEntity.ok(authService.findById(id));
+   }
+   
+   @GetMapping("/users/{id}")
+   public ResponseEntity<UserResponseDTO> userFeeds(@PathVariable("id") Long id) {
+	   return ResponseEntity.ok(authService.getUserFeed(id));
    }
    
 //   @Operation(summary = "프로필수정")

@@ -17,6 +17,10 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import xyz.heetaeb.Woute.domain.feed.dto.response.FeedResponse;
+import xyz.heetaeb.Woute.domain.feed.service.FeedService;
+import xyz.heetaeb.Woute.domain.follow.dto.UserResponseDTO;
+import xyz.heetaeb.Woute.domain.follow.repository.FollowRepository;
 import xyz.heetaeb.Woute.domain.user.dto.TokenDto;
 import xyz.heetaeb.Woute.domain.user.dto.request.UpdateProfileRequest;
 import xyz.heetaeb.Woute.domain.user.dto.request.UserLog;
@@ -36,6 +40,9 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
+    private final FollowRepository followRepository;
+    private final FeedService feedService;
+    
     
     
     public List<UserEntity> selectAll(){
@@ -76,6 +83,28 @@ public class AuthService {
     public void getUserInfo(String token) {
         UserEntity currentUser = TokenUtils.getCurrentUserFromToken(token, "yourSecretKey", userRepository);
     }
+    
+	@Transactional
+	public UserResponseDTO getUserFeed(Long id) {
+		UserEntity user = userRepository.findById(id).orElseThrow();
+		Long followerCount = followRepository.countByFollowerId(id);
+		Long followingCount = followRepository.countByFollowingId(id);
+		List<FeedResponse> feeds = feedService.userFeeds(id);
+		// 로그인 아이디값 가져오기
+//		Boolean hasFollowed = followRepository.countByFollowingIdAndFollowerId(Long.valueOf(authentication.getName()), user.getId());
+		
+		return UserResponseDTO.builder()
+				.id(user.getId())
+				.nickname(user.getNickname())
+				.introduction(user.getIntroduction())
+				.ProfileImage(user.getProfileImage())
+				.feedsCount(Long.valueOf(feeds.size()))
+				.followerCount(followerCount)
+				.followingCount(followingCount)
+				.hasFollowed(false)
+				.feeds(feeds)
+				.build();
+	}
 //    public UserEntity getCurrentUser() {
 //        // 현재 로그인한 사용자의 정보 가져오기
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
