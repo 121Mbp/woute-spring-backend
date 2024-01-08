@@ -35,8 +35,6 @@ public class MailController {
 	 @PostMapping("/join/emailConfirm")
 	   public String emailConfirm(@RequestBody String email) throws Exception {
 		 boolean exist = authService.isEmailAlreadyExists(email);
-		 UserEntity id = authService.findById(51L);
-		 System.out.println(id);
 		 System.out.println(exist);
 		 if(!exist) {
 	     String confirm = emailService.sendSimpleMessage(email);
