@@ -18,11 +18,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+import xyz.heetaeb.Woute.domain.user.repository.UserRepository;
 
 @Entity
 @Getter
 @Builder
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "w_user")
