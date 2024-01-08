@@ -20,7 +20,7 @@ public class CustomUserDetailsService implements UserDetailsService{
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		return userRepository.findByEmail(username)
+		return userRepository.findByEmailIgnoreCase(username)
 				.map(this::createUserDetails)
 				.orElseThrow(()-> new UsernameNotFoundException(username + "을 찾을 수 없습니다."));
 	}
