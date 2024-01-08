@@ -36,19 +36,19 @@ public class FeedController {
     }
 
     @Operation(summary = "유저 피드 목록")
-    @GetMapping("/user/{userId}/feeds")
+    @GetMapping("/users/{userId}/feeds")
     public List<FeedResponse> getAllUserFeeds(@PathVariable("userId") Long userId) {
         return feedService.userFeedList(userId);
     }
 
     @Operation(summary = "유저 코스 목록")
-    @GetMapping("/user/{userId}/course")
+    @GetMapping("/users/{userId}/course")
     public List<FeedResponse> getAllUserCourseFeeds(@PathVariable("userId") Long userId) {
         return feedService.userCourseFeedList(userId);
     }
 
     @Operation(summary = "유저 좋아요 목록")
-    @GetMapping("/user/{userId}/like")
+    @GetMapping("/users/{userId}/like")
     public List<FeedResponse> getAllUserFeedsLike(@PathVariable("userId") Long userId) {
         return feedService.getAllUserFeedsLike(userId);
     }
