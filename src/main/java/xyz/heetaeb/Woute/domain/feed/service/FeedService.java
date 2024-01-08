@@ -12,6 +12,7 @@ import xyz.heetaeb.Woute.domain.feed.dto.response.CourseResponse;
 import xyz.heetaeb.Woute.domain.feed.dto.response.FeedResponse;
 import xyz.heetaeb.Woute.domain.feed.entity.*;
 import xyz.heetaeb.Woute.domain.feed.repository.*;
+import xyz.heetaeb.Woute.domain.notification.service.NotiService;
 import xyz.heetaeb.Woute.domain.reply.entity.ReplyEntity;
 import xyz.heetaeb.Woute.domain.reply.repository.ReplyRepository;
 
@@ -33,6 +34,7 @@ public class FeedService {
     private final LikeRepository likeRepository;
     private final TagsRepository tagsRepository;
     private final ReplyRepository replyRepository;
+    private final NotiService notiService;
 
     // 피드 리스트
     public List<FeedResponse> feedList() {
@@ -65,6 +67,12 @@ public class FeedService {
                 .map(like -> feedRepository.findById(like.getFeedId()).orElse(null))
                 .collect(Collectors.toList());
 
+        return dataList(feeds);
+    }
+
+    // 유저 피드 리스트
+    public List<FeedResponse> userFeeds(Long userId) {
+        List<FeedEntity> feeds = feedRepository.findByUserId(userId);
         return dataList(feeds);
     }
 
@@ -122,6 +130,7 @@ public class FeedService {
         List<AttachEntity> attaches = attachRepository.findAllByFeedId(feedId);
         return CourseResponse.builder()
                 .id(feed.getId())
+                .userId(feed.getUserId())
                 .nickname(feed.getNickname())
                 .profileImage(feed.getProfileImage())
                 .type(feed.getType())
@@ -313,6 +322,7 @@ public class FeedService {
                 .createdAt(ZonedDateTime.now())
                 .build();
         likeRepository.save(like);
+        notiService.send(feed.getUserId(), request.getNickname(), request.getProfileImage(), "님이 게시글에 좋아요를 눌렀습니다.", "/p/" + feed.getId());
     }
 
     // 좋아요 취소
