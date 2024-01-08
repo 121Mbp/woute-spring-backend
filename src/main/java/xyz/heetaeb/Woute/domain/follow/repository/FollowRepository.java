@@ -13,6 +13,10 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     Follow findByFollowingIdAndFollowerId(Long followingId, Long followerId);
     
+    Long countByFollowerId(Long FollowerId);
+    
+    Long countByFollowingId(Long FollowingId);
+    
     Long countByFollowingIdAndFollowerId(Long followingId, Long FollowerId);
     
     @Query(value = "SELECT *  FROM (SELECT ROWNUM RNUM, TABLE_1.*  FROM \r\n"

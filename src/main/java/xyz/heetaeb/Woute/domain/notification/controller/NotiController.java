@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import lombok.RequiredArgsConstructor;
-import xyz.heetaeb.Woute.domain.notification.NotiRespDTO;
+import xyz.heetaeb.Woute.domain.notification.dto.NotiRespDTO;
 import xyz.heetaeb.Woute.domain.notification.service.NotiService;
 
 @RequiredArgsConstructor

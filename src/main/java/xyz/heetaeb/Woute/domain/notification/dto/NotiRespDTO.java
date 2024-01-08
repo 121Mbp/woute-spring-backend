@@ -1,4 +1,4 @@
-package xyz.heetaeb.Woute.domain.notification;
+package xyz.heetaeb.Woute.domain.notification.dto;
 
 import java.time.ZonedDateTime;
 
