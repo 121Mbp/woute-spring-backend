@@ -1,7 +1,13 @@
 package xyz.heetaeb.Woute.domain.feed.service;
 
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import xyz.heetaeb.Woute.domain.feed.dto.request.CourseRequest;
@@ -26,6 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Component
 public class FeedService {
     private final String FOLDER_PATH = "/Users/kevin/Desktop/image/";
     private final FeedRepository feedRepository;
@@ -35,6 +42,10 @@ public class FeedService {
     private final TagsRepository tagsRepository;
     private final ReplyRepository replyRepository;
     private final NotiService notiService;
+    private final AmazonS3Client amazonS3Client;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     // 피드 리스트
     public List<FeedResponse> feedList() {
@@ -251,7 +262,9 @@ public class FeedService {
                                 .filePath(filePath)
                                 .build()
                 );
-                file.transferTo(new File(filePath));
+                ObjectMetadata metadata = new ObjectMetadata();
+                amazonS3Client.putObject(new PutObjectRequest(bucket, cdn, file.getInputStream(), metadata));
+//                file.transferTo(new File(filePath));
                 if(filePath != null) {
                     return "파일 업로드 성공" + filePath;
                 }
@@ -303,6 +316,9 @@ public class FeedService {
         List<TagsEntity> tags = tagsRepository.findAllByFeedId(feedId);
         tagsRepository.deleteAll(tags);
         List<AttachEntity> attaches = attachRepository.findAllByFeedId(feedId);
+        attaches.forEach(attach -> {
+            amazonS3Client.deleteObject(new DeleteObjectRequest(bucket, attach.getUuid()));
+        });
         attachRepository.deleteAll(attaches);
         List<ReplyEntity> reply = replyRepository.findByFeedId(feedId);
         replyRepository.deleteAll(reply);
@@ -315,14 +331,20 @@ public class FeedService {
         int increase = feed.getHeartCount() + 1;
         feed.changeFeedLike(increase);
         feedRepository.save(feed);
+        notiService.send(feed.getUserId(),
+                request.getNickname(),
+                request.getProfileImage(),
+                "님이 게시글에 좋아요를 눌렀습니다.",
+                "/p/" + feed.getId(),
+                feed.getType());
         LikeEntity like = LikeEntity.builder()
                 .feedId(feed.getId())
+                .userId(request.getUserId())
                 .nickname(request.getNickname())
                 .profileImage(request.getProfileImage())
                 .createdAt(ZonedDateTime.now())
                 .build();
         likeRepository.save(like);
-        notiService.send(feed.getUserId(), request.getNickname(), request.getProfileImage(), "님이 게시글에 좋아요를 눌렀습니다.", "/p/" + feed.getId());
     }
 
     // 좋아요 취소
