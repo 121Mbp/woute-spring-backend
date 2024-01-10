@@ -17,7 +17,8 @@ public class UserResponse {
 	private String email;
 	private String nickname;
 	private String introduction;
-	private String ProfileImage;
+	private String profileImage;
+	private String password;
 
 	public static UserResponse of(UserEntity user) {
 		return UserResponse.builder()
@@ -32,6 +33,7 @@ public class UserResponse {
 	        userResponse.setNickname(userEntity.getNickname());
 	        userResponse.setIntroduction(userEntity.getIntroduction());
 	        userResponse.setProfileImage(userEntity.getProfileImage());
+	        userResponse.setPassword(userEntity.getPassword());
 	        return userResponse;
 	    }
 }

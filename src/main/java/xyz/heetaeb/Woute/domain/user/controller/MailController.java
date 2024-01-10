@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import xyz.heetaeb.Woute.domain.user.dto.request.UserEmailRequest;
 import xyz.heetaeb.Woute.domain.user.entity.UserEntity;
 import xyz.heetaeb.Woute.domain.user.service.AuthService;
 import xyz.heetaeb.Woute.domain.user.service.EmailService;
@@ -33,14 +34,27 @@ public class MailController {
 //	   }
 	 @Operation(summary = "인증코드보내기")
 	 @PostMapping("/join/emailConfirm")
-	   public String emailConfirm(@RequestBody String email) throws Exception {
-		 boolean exist = authService.isEmailAlreadyExists(email);
+	   public String emailConfirm(@RequestBody UserEmailRequest request) throws Exception {
+		 boolean exist = authService.findUserByEmail(request);
+		 
 		 System.out.println(exist);
 		 if(!exist) {
-	     String confirm = emailService.sendSimpleMessage(email);
+		 String email = request.getEmail();
+		 String confirm = emailService.sendSimpleMessage(email);
 	     return confirm;
 		 }else {
 			 return "";
 		 }
+	   }
+	 @PostMapping("/login/findEmail")
+	   public String userEmail(@RequestBody UserEmailRequest request) throws Exception{
+		   boolean exist = authService.findUserByEmail(request);
+		   if(exist) {
+			   String email = request.getEmail();
+			   String confirm = emailService.sendSimpleMessage(email);
+			   return confirm;
+		   } else {
+			   return "";
+		   }
 	   }
 }
