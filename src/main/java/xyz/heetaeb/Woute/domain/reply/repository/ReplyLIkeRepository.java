@@ -12,5 +12,9 @@ import xyz.heetaeb.Woute.domain.reply.entity.ReplyLikeEntity;
 @Repository
 public interface ReplyLIkeRepository extends JpaRepository<ReplyLikeEntity, Long> {
 	
+    List<ReplyLikeEntity> findByUserId(Long userId);
+    Optional<ReplyLikeEntity> findByReplyIdAndUserId(Long replyId, Long userId);
+
+	
 
 }

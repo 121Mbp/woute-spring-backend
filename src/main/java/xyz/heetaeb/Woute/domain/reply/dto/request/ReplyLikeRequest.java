@@ -11,4 +11,6 @@ public class ReplyLikeRequest {
 	private Long id;
 	private Long replyId;
 	private Long userId;
+	private String nickname;
+	private String profileImage;
 }
