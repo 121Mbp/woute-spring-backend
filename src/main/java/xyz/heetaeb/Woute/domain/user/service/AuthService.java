@@ -11,12 +11,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -45,7 +50,8 @@ import xyz.heetaeb.Woute.global.config.jwt.TokenUtils;
 @Transactional
 @Slf4j
 public class AuthService {
-	private final String FOLDER_PATH = "C:\\Users\\A\\Pictures";
+	private final AmazonS3Client amazonS3Client;
+	private final String FOLDER_PATH = "https://woute-bucket.s3.ap-northeast-2.amazonaws.com/";
     private final AuthenticationManagerBuilder managerBuilder;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -235,6 +241,9 @@ public class AuthService {
 	
 	//파일첨부
 	 // 이미지 업로드 및 파일 이름 반환
+	@Value("${cloud.aws.s3.bucket}")
+    private String bucket;
+	
 	public String uploadProfileImage(MultipartFile file,Long id) throws IOException {
 	    try {
 	    	System.out.println("file : "+ file);
@@ -242,12 +251,14 @@ public class AuthService {
 	        String fileName = generateUniqueFileName(file.getOriginalFilename());
 	        System.out.println("fileName : "+ fileName);
 	        // 파일을 서버의 업로드 디렉토리에 저장
-	        Path filePath = Path.of(FOLDER_PATH, fileName);
+	        ObjectMetadata metadata = new ObjectMetadata();
+            amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, file.getInputStream(), metadata));
+//	        Path filePath = Path.of(FOLDER_PATH, fileName);
 	        
-	        System.out.println("filePath : "+ filePath);
-	        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+//	        System.out.println("filePath : "+ filePath);
+//	        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 	        UserEntity userEntity = userRepository.findById(id).orElseThrow();
-	        String PathString = filePath.toString();
+//	        String PathString = filePath.toString();
             // 업로드된 파일 이름을 엔터티의 profileImage 필드에 설정
             userEntity.setProfileImage(fileName);
             System.out.println("뭐가들어있어 :" + userEntity);
@@ -255,7 +266,7 @@ public class AuthService {
 	        // 저장된 파일의 이름을 반환
             
 	        return fileName;
-	    } catch (IOException e) {
+	    } catch (Exception e) {
 	        // 예외 발생 시 로그 출력
 	        e.printStackTrace();
 	        throw e; // 예외를 다시 던져서 컨트롤러에서 500 에러 응답이 발생하도록 함
