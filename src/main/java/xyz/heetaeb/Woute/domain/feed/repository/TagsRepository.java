@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface TagsRepository extends JpaRepository<TagsEntity, Long> {
     public List<TagsEntity> findAllByFeedId(Long feeId);
+    List<TagsEntity> findDistinctByWordsContaining(String keyword);
 }
