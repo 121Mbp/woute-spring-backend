@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class ReplyRequest {
 	private Long feed_id;
 	private Long reply_id;
+	private Long user_id;
 	private String nickname;
 	private String profileImage;
 	private Integer heartCount;
