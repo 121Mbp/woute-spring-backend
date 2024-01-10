@@ -32,7 +32,7 @@ public class FollowService {
         		.orElseThrow();
         
         	if(followRepository.countByFollowingIdAndFollowerId(dto.getFollowerId(), dto.getFollowingId()) == 1) {
-        		Follow fromFollow = followRepository.findByFollowingIdAndFollowerId(followerUser.getId(), followingUser.getId());
+        		Follow fromFollow = followRepository.findByFollowingIdAndFollowerId(dto.getFollowerId(), dto.getFollowingId());
         		fromFollow  = Follow.builder()
         				.id(fromFollow.getId())
         				.following(fromFollow.getFollowing())
@@ -54,7 +54,8 @@ public class FollowService {
         				tooFollow.getFollowing().getNickname(),
         				tooFollow.getFollowing().getProfileImage(),
         				"님이 팔로우 했습니다",
-        				"/users/" + tooFollow.getFollowing().getId());
+        				"/users/" + tooFollow.getFollowing().getId(),
+        				"follow");
         	} else {
         		Follow follow = Follow.builder()
         				.following(followingUser)
@@ -68,7 +69,8 @@ public class FollowService {
         				follow.getFollowing().getNickname(),
         				follow.getFollowing().getProfileImage(), 
         				"님이 팔로우 했습니다", 
-        				"/users/" + follow.getFollowing().getId());
+        				"/users/" + follow.getFollowing().getId(),
+        				"follow");
         	}
     }
     
@@ -92,25 +94,28 @@ public class FollowService {
     	}
     }
     
-
-
+    
     // 팔로워 리스트
-    public List<SimpleFollowerListDTO> getFollowers(Long id) {
-        List<Follow> followers = followRepository.findByFollowerId(id);
+    public List<SimpleFollowerListDTO> getFollowers(Long userId, Long myId) {
+        List<Follow> followers = followRepository.findByFollowerId(userId);
         
         return followers.stream().map((follower) -> SimpleFollowerListDTO.builder()
         		.id(follower.getId())
         		.followerId(follower.getFollowing().getId())
         		.followerNick(follower.getFollowing().getNickname())
         		.followerImg(follower.getFollowing().getProfileImage())
-        		.followState(follower.isFollowState())
         		.CreatedAt(follower.getCreatedAt())
+        		.followState(
+        				userId == myId ? follower.isFollowState() :
+    					followRepository.countByFollowingIdAndFollowerId(myId, follower.getFollowing().getId()) == 1 ?
+    							true : false
+    					)
         		.build()).toList();
     }
 
     // 팔로잉 리스트
-    public List<SimpleFollowingListDTO> getFollowings(Long id) {
-    	List<Follow> followings = followRepository.findByFollowingId(id);
+    public List<SimpleFollowingListDTO> getFollowings(Long userId, Long myId) {
+    	List<Follow> followings = followRepository.findByFollowingId(userId);
     	
     	return followings.stream().map((following) -> SimpleFollowingListDTO.builder()
     			.id(following.getId())
@@ -118,13 +123,18 @@ public class FollowService {
     			.followingNick(following.getFollower().getNickname())
     			.followingImg(following.getFollower().getProfileImage())
     			.CreatedAt(following.getCreatedAt())
+    			.followState(
+    					userId == myId ? following.isFollowState() :
+    					followRepository.countByFollowingIdAndFollowerId(myId, following.getFollower().getId()) == 1 ?
+    							true : false
+    					)
     			.build()).toList();
     }
 
 
     // 팔로워 검색
-    public List<SimpleFollowerListDTO> searchFollower(Long userid, String nickname) {
-    	List<Follow> followers = followRepository.findByFollowerId(userid);
+    public List<SimpleFollowerListDTO> searchFollower(Long userId, Long myId , String nickname) {
+    	List<Follow> followers = followRepository.findByFollowerId(userId);
     	
     	if(nickname.trim().equals("")) {
     		return followers.stream().filter(follower -> follower.getFollowing().getNickname().contains("가"))
@@ -143,16 +153,21 @@ public class FollowService {
     		    			.followerId(f.getFollowing().getId())
     		    			.followerNick(f.getFollowing().getNickname())
     		    			.followerImg(f.getFollowing().getProfileImage())
-    		    			.followState(f.isFollowState())
+    		    			.followState(
+    		    					userId == myId ? f.isFollowState() :
+    		        					followRepository.countByFollowingIdAndFollowerId(myId, f.getFollowing().getId()) == 1 ?
+    		        							true : false
+    								)
     		    			.CreatedAt(f.getCreatedAt())
     		    			.build()).toList();
     	}
     }
     
     // 팔로잉 검색
-    public List<SimpleFollowingListDTO> searchFollowing(Long userid, String nickname) {
-    	List<Follow> followings = followRepository.findByFollowingId(userid);
+    public List<SimpleFollowingListDTO> searchFollowing(Long userId, Long myId , String nickname) {
+    	List<Follow> followings = followRepository.findByFollowingId(userId);
     	
+    	// 검색어 공백일때 결과 없음
     	if(nickname.trim().equals("")) {
     		return followings.stream().filter(following -> following.getFollower().getNickname().contains("가"))
     				.map(f -> SimpleFollowingListDTO.builder()
@@ -161,8 +176,10 @@ public class FollowService {
     						.followingNick(f.getFollower().getNickname())
     						.followingImg(f.getFollower().getProfileImage())
     						.CreatedAt(f.getCreatedAt())
+    						.followState(f.isFollowState())
     						.build()).toList();
     	} else {
+    		// 검색어 검색
     		return followings.stream().filter(following -> following.getFollower().getNickname().contains(nickname.trim()))
     				.map(f -> SimpleFollowingListDTO.builder()
     						.id(f.getId())
@@ -170,8 +187,54 @@ public class FollowService {
     						.followingNick(f.getFollower().getNickname())
     						.followingImg(f.getFollower().getProfileImage())
     						.CreatedAt(f.getCreatedAt())
+    						.followState(
+    								userId == myId ? f.isFollowState() :
+    		        					followRepository.countByFollowingIdAndFollowerId(myId, f.getFollower().getId()) == 1 ?
+    		        							true : false
+    								)
     						.build()).toList();
     	}
     	
     }
+    
+    
+    // 팔로워 검색
+    public List<SimpleFollowerListDTO> searchFollower(Long userid, String nickname) {
+    	List<Follow> followers = followRepository.findByFollowerId(userid);
+    	
+    	// 검색어 공백일때 결과 없음
+    	if(nickname.trim().equals("")) {
+    		return followers.stream().filter(follower -> follower.getFollowing().getNickname().contains("가"))
+    				.map(f -> SimpleFollowerListDTO.builder()
+    						.id(f.getId())
+    						.followerId(f.getFollowing().getId())
+    						.followerNick(f.getFollowing().getNickname())
+    						.followerImg(f.getFollowing().getProfileImage())
+    						.followState(f.isFollowState())
+    						.CreatedAt(f.getCreatedAt())
+    						.build()).toList();
+    	} else {
+    		// 검색어 검색
+        	return followers.stream().filter(follower -> follower.getFollowing().getNickname().contains(nickname.trim()))
+    		    	.map(f -> SimpleFollowerListDTO.builder()
+    		    			.id(f.getId())
+    		    			.followerId(f.getFollowing().getId())
+    		    			.followerNick(f.getFollowing().getNickname())
+    		    			.followerImg(f.getFollowing().getProfileImage())
+    		    			.followState(f.isFollowState())
+    		    			.CreatedAt(f.getCreatedAt())
+    		    			.build()).toList();
+    	}
+    }
+
+    /**
+     * 유저 페이지에서 언팔할때 follow_id가 없어서 단일조회 후 id 값 추출
+     * @param myId
+     * @param userId
+     * @return
+     */
+	public SimpleFollowerListDTO getFollower(Long myId, Long userId) {
+		Follow follower = followRepository.findByFollowingIdAndFollowerId(myId, userId);
+		return SimpleFollowerListDTO.builder().id(follower.getId()).build();
+	}
 }

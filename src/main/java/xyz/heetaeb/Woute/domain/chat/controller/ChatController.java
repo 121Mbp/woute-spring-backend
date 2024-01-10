@@ -31,8 +31,8 @@ public class ChatController {
 	 * 메뉴 클릭시 첫 디엠 화면
 	 * @param id
 	 */
-	@GetMapping("/chat") // 로그인한 정보 가져올시
-//	@GetMapping("/chat/{id}")
+//	@GetMapping("/chat") // 로그인한 정보 가져올시
+	@GetMapping("/chat/{id}")
 	public ChatListResponseDTO getList(@PathVariable("id") Long id) {
 		return chatService.getList(id);
 	}
@@ -41,9 +41,9 @@ public class ChatController {
 	 * 클릭한 디엠내역 조회
 	 * @param roomId
 	 */
-	@PostMapping("/chat/m/{id}") // 로그인 정보 가져올시s
-//	@PostMapping("/chat/1/m/1")
-	public ChatLogResponseDTO getRoom(ChatRequestDTO dto) {
+//	@PostMapping("/chat/m/{id}") // 로그인 정보 가져올시
+	@PostMapping("/chat/{id}/m/{userId}")
+	public ChatLogResponseDTO getRoom(@RequestBody ChatRequestDTO dto) {
 		System.out.println("로그 조회성공");
 		return chatService.getRoom(dto.getRoomId());
 	}
@@ -53,13 +53,27 @@ public class ChatController {
 	 * @param id
 	 * @param dto
 	 */
-	@MessageMapping("/chat/m") // 로그인 정보 가져올시
-//	@MessageMapping("/chat/{id}/m")
+//	@MessageMapping("/chat/m") // 로그인 정보 가져올시
+	@MessageMapping("/chat/m")
 	public void message(Map<String, ChatRequestDTO> body) {
-		System.out.println("id : " + body.get("vData"));
-		ChatRequestDTO dto = body.get("vData");
-		System.out.println("dto : " + dto);
-		chatService.createRoom(dto);
-		simpMessagingTemplate.convertAndSend("/sub/chat/m/1", dto);
+		System.out.println("body : " + body);
+		if(body.get("newMessage") != null) {
+			System.out.println("newMessage : " + body.get("message"));
+			ChatRequestDTO dto = body.get("newMessage");
+			System.out.println("new dto : " + dto);
+			chatService.createRoom(dto);
+			simpMessagingTemplate.convertAndSend("/sub/chat/" + dto.getMyId() + "/m/" + dto.getRoomId()  , dto);
+		} else {
+			System.out.println("id : " + body.get("message"));
+			ChatRequestDTO dto = body.get("message");
+			System.out.println("dto : " + dto);
+			chatService.createRoom(dto);
+			simpMessagingTemplate.convertAndSend("/sub/chat/m/" + dto.getRoomId()  , dto);
+		}
 	}                                                                                                                          
+	
+	@PostMapping("/chat/{id}/read")
+	public void read(@PathVariable("id") Long id, @RequestBody ChatRequestDTO dto) {
+		chatService.isRead(id, dto.getRoomId());
+	}
 }

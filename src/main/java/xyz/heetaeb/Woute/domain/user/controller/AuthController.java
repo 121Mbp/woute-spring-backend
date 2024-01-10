@@ -32,6 +32,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import xyz.heetaeb.Woute.domain.chat.dto.ChatRequestDTO;
 import xyz.heetaeb.Woute.domain.follow.dto.UserResponseDTO;
 import xyz.heetaeb.Woute.domain.user.dto.TokenDto;
 import xyz.heetaeb.Woute.domain.user.dto.request.FindPwRequest;

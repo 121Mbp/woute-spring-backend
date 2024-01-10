@@ -25,6 +25,7 @@ import xyz.heetaeb.Woute.domain.follow.service.FollowService;
 public class FollowController {
     private final FollowService followService;
 
+    // 팔로우
     @PostMapping("/follow")
     @Transactional
     public ResponseEntity<String> follow(@RequestBody RequestDTO dto) {
@@ -38,29 +39,41 @@ public class FollowController {
         }
     }
     
-    @GetMapping("/{id}/follower")
-    public List<SimpleFollowerListDTO> getFollower(@PathVariable("id") Long userid) {
-    	System.out.println("userid : " + userid);
-    	return followService.getFollowers(userid);
-    }
-    
-    @GetMapping("/{id}/following")
-    public List<SimpleFollowingListDTO> getFollowing(@PathVariable("id") Long userid) {
-    	return followService.getFollowings(userid);
-    }
-    
+    // 언팔로우
     @DeleteMapping("/follow/{id}")
     public void unFollow(@PathVariable("id") Long id) {
     	followService.unFollow(id);
     }
     
-    @PostMapping("/{id}/follower/search")
-    public List<SimpleFollowerListDTO> searchFollower(@PathVariable("id") Long userid, @RequestBody RequestDTO dto) {
-    	return followService.searchFollower(userid, dto.getNickname());
+    // 팔로워 리스트
+    @PostMapping("/{id}/follower")
+    public List<SimpleFollowerListDTO> getFollower(@PathVariable("id") Long userId, @RequestBody RequestDTO dto) {
+    	System.out.println("userid : " + userId);
+    	return followService.getFollowers(userId, dto.getFollowingId());
     }
     
+    // 팔로잉 리스트
+    @PostMapping("/{id}/following")
+    public List<SimpleFollowingListDTO> getFollowing(@PathVariable("id") Long userId, @RequestBody RequestDTO dto) {
+    	return followService.getFollowings(userId, dto.getFollowingId());
+    }
+    
+    
+    // 팔로워 리스트 검색
+    @PostMapping("/{id}/follower/search")
+    public List<SimpleFollowerListDTO> searchFollower(@PathVariable("id") Long userid, @RequestBody RequestDTO dto) {
+    	return followService.searchFollower(userid, dto.getFollowingId(), dto.getNickname());
+    }
+    
+    // 팔로잉 리스트 검색
     @PostMapping("/{id}/following/search")
     public List<SimpleFollowingListDTO> searchFollowing(@PathVariable("id") Long userid, @RequestBody RequestDTO dto) {
-    	return followService.searchFollowing(userid, dto.getNickname());
+    	return followService.searchFollowing(userid, dto.getFollowingId(), dto.getNickname());
+    }
+    
+    // 유저 페이지에서 언팔할때 follow_id가 없어서 조회 후 id 값 추출
+    @GetMapping("check/{myId}/{userId}")
+    public SimpleFollowerListDTO checkUnFollow(@PathVariable("myId") Long myId, @PathVariable("userId") Long userId) {
+    	return followService.getFollower(myId, userId);
     }
 }

@@ -13,4 +13,5 @@ public class SimpleFollowingListDTO {
 	private String followingNick;
 	private String followingImg;
 	private ZonedDateTime CreatedAt;
+	private boolean followState;
 }
