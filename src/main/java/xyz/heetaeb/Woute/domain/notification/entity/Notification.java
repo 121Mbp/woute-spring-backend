@@ -34,6 +34,8 @@ public class Notification {
 	
 	private String senderUrl;
 	
+	private String type;
+	
 	private boolean read;
 	
 	private ZonedDateTime createdAt;
