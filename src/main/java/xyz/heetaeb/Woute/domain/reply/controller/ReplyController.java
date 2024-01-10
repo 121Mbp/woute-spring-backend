@@ -42,8 +42,9 @@ public class ReplyController {
 	
 	@Operation(summary = "댓글 목록")
 	@GetMapping("/p/{feedId}/reply")
-	public List<ReplyResponse> getReplyList(@PathVariable("feedId") Long feedId, 
+	public List<ReplyResponse> getReplyList(@PathVariable("feedId") Long feedId,
 	                                        @RequestParam("userId") Long userId) {
+		System.out.println("userId 들어왔니??"+ userId);
 	    return replyService.replyList(feedId, userId);
 	}
 	
