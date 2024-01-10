@@ -1,29 +1,38 @@
 package xyz.heetaeb.Woute.domain.user.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.UUID;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import xyz.heetaeb.Woute.domain.feed.dto.response.FeedResponse;
+import xyz.heetaeb.Woute.domain.feed.entity.AttachEntity;
 import xyz.heetaeb.Woute.domain.feed.service.FeedService;
 import xyz.heetaeb.Woute.domain.follow.dto.UserResponseDTO;
 import xyz.heetaeb.Woute.domain.follow.repository.FollowRepository;
 import xyz.heetaeb.Woute.domain.user.dto.TokenDto;
+import xyz.heetaeb.Woute.domain.user.dto.request.UpdateNicknameRequest;
 import xyz.heetaeb.Woute.domain.user.dto.request.UpdateProfileRequest;
+import xyz.heetaeb.Woute.domain.user.dto.request.UserEmailRequest;
 import xyz.heetaeb.Woute.domain.user.dto.request.UserLog;
+import xyz.heetaeb.Woute.domain.user.dto.request.UserProfileRequest;
 import xyz.heetaeb.Woute.domain.user.dto.request.UserRequest;
 import xyz.heetaeb.Woute.domain.user.dto.response.UserResponse;
 import xyz.heetaeb.Woute.domain.user.entity.UserEntity;
@@ -36,6 +45,7 @@ import xyz.heetaeb.Woute.global.config.jwt.TokenUtils;
 @Transactional
 @Slf4j
 public class AuthService {
+	private final String FOLDER_PATH = "C:\\Users\\A\\Pictures";
     private final AuthenticationManagerBuilder managerBuilder;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -105,50 +115,200 @@ public class AuthService {
 				.feeds(feeds)
 				.build();
 	}
-//    public UserEntity getCurrentUser() {
-//        // 현재 로그인한 사용자의 정보 가져오기
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String currentUsername = authentication.getName();
-//
-//        // Optional에서 UserEntity로 변환
-//        return userRepository.findByEmail(currentUsername)
-//                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다. Email: " + currentUsername));
-//    }
-    
+	 public byte[] downloadImageSystem(String id) throws IOException {
+	        String attaches = id;
+	        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-    public UserResponse updateUserProfile(Long userId, UpdateProfileRequest updateRequest) {
-        UserEntity currentUser = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("수정할 수 없는 사용자입니다."));
+	            String filePath = FOLDER_PATH;
+	            byte[] fileBytes = Files.readAllBytes(new File(filePath).toPath());
+	            byteArrayOutputStream.write(fileBytes);
+	        
+	        return byteArrayOutputStream.toByteArray();
+	    }
+	
+	 public UserEntity findById(Long userId) {
+	        return userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("존재하지 않은 사용자"));
+	    }
 
-        if (updateRequest.getNickname() != null) {
-            currentUser.setNickname(updateRequest.getNickname());
-            System.out.println("닉네임 수정 : "+ updateRequest.getNickname());
+	public UserResponse updateUserNickname(Long userId, String nickname) {
+	    UserEntity currentUser = userRepository.findById(userId)
+	            .orElseThrow(() -> new IllegalArgumentException("수정할 수 없는 사용자입니다."));
+	    System.out.println("id : "+ userId+"nickname : " + nickname);
+	    if (!Objects.equals(nickname, currentUser.getNickname())) {
+	        currentUser.setNickname(nickname);
+	        System.out.println("닉네임 수정 : " + currentUser);
+	    }
+
+	    currentUser.setUpdatedAt(ZonedDateTime.now());
+
+	    UserEntity updatedUser = userRepository.save(currentUser);
+
+	    return UserResponse.from(updatedUser);
+	}
+	//자기소개 수정
+	public UserResponse updateUserIntro(Long userId, String introduction) {
+		UserEntity currentUser = userRepository.findById(userId)
+				.orElseThrow(() -> new IllegalArgumentException("수정할 수 없는 사용자입니다."));
+		System.out.println("id : "+ userId+"introduction : " + introduction);
+		if (!Objects.equals(introduction, currentUser.getIntroduction())) {
+			currentUser.setIntroduction(introduction);
+			System.out.println("자기소개 수정 : " + currentUser);
+		}
+		
+		currentUser.setUpdatedAt(ZonedDateTime.now());
+		
+		UserEntity updatedUser = userRepository.save(currentUser);
+		
+		return UserResponse.from(updatedUser);
+	}
+	//비밀번호 수정
+	public UserResponse updateUserpw(Long userId, String password) {
+		UserEntity currentUser = userRepository.findById(userId)
+				.orElseThrow(() -> new IllegalArgumentException("수정할 수 없는 사용자입니다."));
+		System.out.println("id : "+ userId+"password : " + password);
+		
+			currentUser.setPassword(passwordEncoder.encode(password));
+		System.out.println("비밀번호 수정 : " + currentUser);
+		
+		currentUser.setUpdatedAt(ZonedDateTime.now());
+		
+		UserEntity updatedUser = userRepository.save(currentUser);
+		
+		return UserResponse.from(updatedUser);
+	}
+	public UserResponse updateUserpw(String password, String email) {
+		UserEntity currentUser = userRepository.findByEmail(email);
+		System.out.println("email : "+ email+"password : " + password);
+		System.out.println("조회 : " + currentUser);
+		
+			currentUser.setPassword(passwordEncoder.encode(password));
+		System.out.println("비밀번호 수정 : " + currentUser);
+		
+		currentUser.setUpdatedAt(ZonedDateTime.now());
+		
+		UserEntity updatedUser = userRepository.save(currentUser);
+		
+		return UserResponse.from(updatedUser);
+	}
+	  public String deleteUserById(Long userId) {
+	        UserEntity user = userRepository.findById(userId).orElseThrow();
+	        if (user != null) {
+	        	userRepository.deleteById(userId);
+	        	return "Y";
+	        }else {
+	        	return "N";
+	        }
+	    }
+	
+	public boolean passwordCheck(Long userId, String password) {
+	    UserEntity currentUser = userRepository.findById(userId)
+	            .orElseThrow(() -> new IllegalArgumentException("수정할 수 없는 사용자입니다."));
+	    System.out.println("화면으로 부터온 pw : " + password);
+	    System.out.println("db pw" + currentUser.getPassword());
+	    if (passwordEncoder.matches(password, currentUser.getPassword())) {
+	        System.out.println("비교 true");
+	        return true;
+	    } else {
+	        System.out.println("비교 false");
+	        return false;
+	    }
+	}
+	public boolean findUserByEmail(UserEmailRequest request) {
+	   	System.out.println("클라이언트에서 받은 email : " + request.getEmail());
+        UserEntity user =  userRepository.findByEmail(request.getEmail());
+        System.out.println("서버 email 조회 : " + user);
+        if (user != null) {
+        	return true;
+        }else {
+        	return false;
         }
-        if (updateRequest.getIntroduction() != null) {
-            currentUser.setIntroduction(updateRequest.getIntroduction());
-            System.out.println("자기소개 수정");
-        }
-        if (updateRequest.getPassword() != null) {
-            currentUser.setPassword(passwordEncoder.encode(updateRequest.getPassword()));
-            System.out.println("비밀번호 수정 : " + updateRequest.getPassword());
-        }
-        if (updateRequest.getProfileImage() != null) {
-            currentUser.setProfileImage(updateRequest.getProfileImage());
-            System.out.println("프로필 사진 수정");
-        }
-
-        currentUser.setUpdatedAt(ZonedDateTime.now());
-
-     
-        UserEntity updatedUser = userRepository.save(currentUser);
-
-        return UserResponse.from(updatedUser);
     }
-    public UserEntity findById(Long userId) {
-		return userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("존재하지 않은 사용자"));
+	//uuid 가져오기
+	public String getUUID(Long id) {
+		UserEntity user = userRepository.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("수정할 수 없는 사용자입니다."));
+		System.out.println("로그인 되어있는 사용자의 아이디 조회 : "+ id);
+		String uuid = user.getProfileImage();
+		System.out.println("uuid : "+uuid);
+		return uuid;
+	}
+	
+	//파일첨부
+	 // 이미지 업로드 및 파일 이름 반환
+	public String uploadProfileImage(MultipartFile file,Long id) throws IOException {
+	    try {
+	    	System.out.println("file : "+ file);
+	        // 업로드된 파일의 이름을 생성
+	        String fileName = generateUniqueFileName(file.getOriginalFilename());
+	        System.out.println("fileName : "+ fileName);
+	        // 파일을 서버의 업로드 디렉토리에 저장
+	        Path filePath = Path.of(FOLDER_PATH, fileName);
+	        
+	        System.out.println("filePath : "+ filePath);
+	        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+	        UserEntity userEntity = userRepository.findById(id).orElseThrow();
+	        String PathString = filePath.toString();
+            // 업로드된 파일 이름을 엔터티의 profileImage 필드에 설정
+            userEntity.setProfileImage(fileName);
+            System.out.println("뭐가들어있어 :" + userEntity);
+            UserEntity updateUser = userRepository.save(userEntity);
+	        // 저장된 파일의 이름을 반환
+            
+	        return fileName;
+	    } catch (IOException e) {
+	        // 예외 발생 시 로그 출력
+	        e.printStackTrace();
+	        throw e; // 예외를 다시 던져서 컨트롤러에서 500 에러 응답이 발생하도록 함
+	    }
 	}
 
-//    public List<UserResponse> userList(Long id) {
-//    	
-//    }
+    // 고유한 파일 이름 생성
+    private String generateUniqueFileName(String originalFileName) {
+        // 파일 확장자 추출
+        String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        
+        // UUID를 이용하여 고유한 파일 이름 생성
+        return UUID.randomUUID().toString() + extension;
+    }
+    @Transactional
+    public UserResponseDTO getUserFeed(Long id, Long myId) {
+        UserEntity user = userRepository.findById(id).orElseThrow();
+        Long followerCount = followRepository.countByFollowerId(id);
+        Long followingCount = followRepository.countByFollowingId(id);
+        List<FeedResponse> feeds = feedService.userFeeds(id);
+        // 로그인 아이디값 가져오기
+        Long hasFollowed = followRepository.countByFollowingIdAndFollowerId(myId, id);
+        System.out.println("hasFollowed: " + hasFollowed);
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .nickname(user.getNickname())
+                .introduction(user.getIntroduction())
+                .ProfileImage(user.getProfileImage())
+                .feedsCount(Long.valueOf(feeds.size()))
+                .followerCount(followerCount)
+                .followingCount(followingCount)
+                .hasFollowed(hasFollowed == 1 ? true : false)
+                .feeds(feeds)
+                .build();
+    }
+    
+    @Transactional
+    public UserResponseDTO getMyFeed(Long id) {
+        UserEntity user = userRepository.findById(id).orElseThrow();
+        Long followerCount = followRepository.countByFollowerId(id);
+        Long followingCount = followRepository.countByFollowingId(id);
+        List<FeedResponse> feeds = feedService.userFeeds(id);
+        
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .nickname(user.getNickname())
+                .introduction(user.getIntroduction())
+                .ProfileImage(user.getProfileImage())
+                .feedsCount(Long.valueOf(feeds.size()))
+                .followerCount(followerCount)
+                .followingCount(followingCount)
+                .feeds(feeds)
+                .build();
+    }
+   
 }
