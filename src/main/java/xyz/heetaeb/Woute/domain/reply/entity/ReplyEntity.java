@@ -27,8 +27,9 @@ public class ReplyEntity {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "w_reply_seq")
 	@SequenceGenerator(name = "w_reply_seq", sequenceName = "w_reply_SEQ", allocationSize = 1)
 	private Long id;
-	
 	private Long feedId;
+	private Long userId;
+	private Long replyId;
 	private String nickname;
 	private String profileImage;
 	private String content;
@@ -38,5 +39,8 @@ public class ReplyEntity {
 	public void changeFeedLike(int heartCount) {
 		this.heartCount = heartCount;
 	}
+	 public void setHeartCount(int heartCount) {
+	        this.heartCount = heartCount;
+	    }
 
 }
