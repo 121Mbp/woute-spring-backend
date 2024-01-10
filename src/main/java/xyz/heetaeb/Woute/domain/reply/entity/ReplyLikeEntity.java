@@ -1,6 +1,5 @@
 package xyz.heetaeb.Woute.domain.reply.entity;
 
-import java.time.ZonedDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
