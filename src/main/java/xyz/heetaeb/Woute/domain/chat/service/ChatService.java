@@ -55,7 +55,6 @@ public class ChatService {
 				.content(dto.getMessage())
 				.roomId(dto.getRoomId())
 				.createdAt(ZonedDateTime.now())
-//				.createdAt(dto.getLastMsgTime())
 				.build();
 		
 		if(joinRoomRepository.countByRoomId(dto.getRoomId()) != 2) {
@@ -65,7 +64,7 @@ public class ChatService {
 					.toUserNick(toUser.getNickname())
 					.toUserImg(toUser.getProfileImage())
 					.roomId(dto.getRoomId())
-					.read(false)
+					.read(true)
 					.lastMsg(dto.getMessage())
 					.lastMsgTime(msg.getCreatedAt())
 					.build();
@@ -94,7 +93,7 @@ public class ChatService {
 					.toUserNick(myRoom.getToUserNick())
 					.toUserImg(myRoom.getToUserImg())
 					.roomId(myRoom.getRoomId())
-					.read(false)
+					.read(true)
 					.lastMsg(dto.getMessage())
 					.lastMsgTime(msg.getCreatedAt())
 					.build();
@@ -119,6 +118,7 @@ public class ChatService {
 		
 	}
 
+	// 알림 읽기
 	public ChatLogResponseDTO getRoom(Long roomId) {
 		List<ChatMsg> msgs = chatMsgRepository.findByRoomIdOrderByCreatedAtDesc(roomId);
 		ChatLogResponseDTO messages = ChatLogResponseDTO.builder()
@@ -135,4 +135,20 @@ public class ChatService {
 		return messages;
 	}
 		
+	public void isRead(Long userId, Long roomId) {
+		JoinRoom room = joinRoomRepository.findByRoomIdAndMyUserId(roomId, userId);
+		JoinRoom updateRoom = room.builder()
+				.id(room.getId())
+				.myUserId(room.getMyUserId())
+				.toUserId(room.getToUserId())
+				.toUserNick(room.getToUserNick())
+				.toUserImg(room.getToUserImg())
+				.roomId(room.getRoomId())
+				.lastMsg(room.getLastMsg())
+				.read(true)
+				.lastMsgTime(room.getLastMsgTime())
+				.build();
+		joinRoomRepository.save(updateRoom);
+	}
+	
 }

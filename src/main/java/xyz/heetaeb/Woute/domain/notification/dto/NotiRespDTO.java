@@ -21,9 +21,12 @@ public class NotiRespDTO {
 	
 	private String senderUrl;
 	
-	private boolean read;
+	private String type;
+	
+	private boolean isRead;
 	
 	private ZonedDateTime CreatedAt;
+	
 	
 	public static NotiRespDTO toDto(Notification notification) {
 		return new NotiRespDTO(
@@ -33,6 +36,7 @@ public class NotiRespDTO {
 				notification.getProfileImg(),
 				notification.getContent(), 
 				notification.getSenderUrl(), 
+				notification.getType(),
 				notification.isRead(), 
 				notification.getCreatedAt());
 	}

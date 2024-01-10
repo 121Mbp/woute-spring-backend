@@ -61,7 +61,8 @@ public class NotiService {
 				.profileImg(noti.getProfileImg())
 				.content(noti.getContent())
 				.senderUrl(noti.getSenderUrl())
-				.read(noti.isRead())
+				.type(noti.getType())
+				.isRead(noti.isRead())
 				.CreatedAt(noti.getCreatedAt())
 				.build()).toList();
 	}
@@ -71,8 +72,11 @@ public class NotiService {
 		List<Notification> readNotis = notis.stream().map(noti -> Notification.builder()
 				.id(noti.getId())
 				.userId(noti.getUserId())
+				.nickname(noti.getNickname())
+				.profileImg(noti.getProfileImg())
 				.content(noti.getContent())
 				.senderUrl(noti.getSenderUrl())
+				.type(noti.getType())
 				.read(true)
 				.createdAt(noti.getCreatedAt())
 				.build()).toList();
@@ -82,9 +86,9 @@ public class NotiService {
 	
 	
 	@Transactional
-	public void send(Long userid, String nickname, String profileImg, String content, String url) {
+	public void send(Long userid, String nickname, String profileImg, String content, String url, String type) {
 		
-        Notification notification = creatNoti(userid, nickname, profileImg, content, url);
+        Notification notification = creatNoti(userid, nickname, profileImg, content, url, type);
         String id = String.valueOf(userid);
         
         // 로그인 한 유저의 SseEmitter 모두 가져오기
@@ -102,13 +106,14 @@ public class NotiService {
         );
     }
 
-	private Notification creatNoti(Long id, String nickname, String profileImg,  String content, String url) {
+	private Notification creatNoti(Long id, String nickname, String profileImg,  String content, String url, String type) {
 		Notification notification = Notification.builder()
 				.userId(id)
 				.nickname(nickname)
 				.profileImg(profileImg)
 				.content(content)
 				.senderUrl(url)
+				.type(type)
 				.read(false)
 				.createdAt(ZonedDateTime.now())
 				.build();
