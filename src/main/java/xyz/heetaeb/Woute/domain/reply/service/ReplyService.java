@@ -3,6 +3,7 @@ package xyz.heetaeb.Woute.domain.reply.service;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import xyz.heetaeb.Woute.domain.feed.dto.request.LikeRequest;
+import xyz.heetaeb.Woute.domain.feed.entity.FeedEntity;
+import xyz.heetaeb.Woute.domain.feed.repository.FeedRepository;
 import xyz.heetaeb.Woute.domain.notification.service.NotiService;
 import xyz.heetaeb.Woute.domain.reply.dto.request.ReplyLikeRequest;
 import xyz.heetaeb.Woute.domain.reply.dto.request.ReplyRequest;
@@ -20,6 +23,8 @@ import xyz.heetaeb.Woute.domain.reply.entity.ReplyEntity;
 import xyz.heetaeb.Woute.domain.reply.entity.ReplyLikeEntity;
 import xyz.heetaeb.Woute.domain.reply.repository.ReplyLIkeRepository;
 import xyz.heetaeb.Woute.domain.reply.repository.ReplyRepository;
+import xyz.heetaeb.Woute.domain.user.entity.UserEntity;
+import xyz.heetaeb.Woute.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,8 @@ public class ReplyService {
 	private final ReplyRepository replyRepository;
 	private final ReplyLIkeRepository likeRepository;
 	private final NotiService notiService;
+	private final UserRepository userRepository;
+	private final FeedRepository feedRepository;
 	
 //	댓글 목록 
 //	public List<ReplyResponse> replyList(Long feed_id) {
@@ -40,23 +47,25 @@ public class ReplyService {
 //						.createdAt(reply.getCreated_at()).heartCount(reply.getHeartCount()).build())
 //				.toList();
 //	}
-	public List<ReplyResponse> replyList(Long feed_id, Long user_id){
-		List<ReplyEntity> replys = replyRepository.findByFeedId(feed_id);
-		List<ReplyLikeEntity> userLikes = likeRepository.findByUserId(user_id);
-		
+	public List<ReplyResponse> replyList(Long feedId, Long userId){
+		List<ReplyEntity> replys = replyRepository.findByFeedId(feedId);
+		List<ReplyLikeEntity> userLikes = likeRepository.findByUserId(userId);
+
 		Set<Long> likedReplyIds = userLikes.stream()
 				.map(ReplyLikeEntity::getReplyId)
 				.collect(Collectors.toSet());
- 	
+		System.out.println("testetetetet");
 		return replys.stream()
 				.map(reply -> {
 					boolean userLiked = likedReplyIds.contains(reply.getId());
-					 System.out.println("Reply ID: " + reply.getId() + " User Liked: " + userLiked); 
+					Optional<UserEntity> user = userRepository.findById(reply.getUserId());
+					 System.out.println("Reply ID: " + reply.getId() + " User Liked: " + userLiked);
 					return ReplyResponse.builder()
+							.id(reply.getId())
 							.feed_id(reply.getFeedId())
-							.reply_id(reply.getId())
-							.nickname(reply.getNickname())
-							.profileImage(reply.getProfileImage())
+							.user_id(reply.getUserId())
+							.nickname(user.map(UserEntity::getNickname).orElse(null))
+							.profileImage(user.map(UserEntity::getProfileImage).orElse(null))
 							.content(reply.getContent())
 							.createdAt(reply.getCreated_at())
 							.heartCount(reply.getHeartCount())
@@ -72,20 +81,21 @@ public class ReplyService {
 	//댓글 입력
 	@Transactional
 	public void insertReply(ReplyRequest request) {
-		System.out.println(request.getFeed_id());
+		FeedEntity feed = feedRepository.findById(request.getFeed_id()).orElseThrow();
+		Optional<UserEntity> user = userRepository.findById(request.getUser_id());
 		
 		ReplyEntity repley = ReplyEntity.builder()
 				.feedId(request.getFeed_id())
-				.id(request.getReply_id())
-				.nickname(request.getNickname())
-				.profileImage(request.getProfileImage())
+				.userId(request.getUser_id())
+				.nickname(user.map(UserEntity::getNickname).orElse(null))
+				.profileImage(user.map(UserEntity::getProfileImage).orElse(null))
 				.content(request.getContent())
 				.heartCount(request.getHeartCount())
 				.created_at(ZonedDateTime.now())
 				.build();
 		replyRepository.save(repley);
-//		notiService.send(request.getUser_id(), request.getNickname(), request.getProfileImage()
-//				,"님이 댓글을 작성했습니다.", "/p/"+ request.getFeed_id());;
+		notiService.send(request.getUser_id(), user.map(UserEntity::getNickname).orElse(null), user.map(UserEntity::getProfileImage).orElse(null)
+				,"님이 댓글을 작성했습니다.", "/p/"+ feed.getId(), feed.getType());
 
 		
 	}
