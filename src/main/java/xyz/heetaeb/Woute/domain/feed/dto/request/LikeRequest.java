@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LikeRequest {
+    private Long userId;
     private String nickname;
     private String profileImage;
     private ZonedDateTime createdAt;
