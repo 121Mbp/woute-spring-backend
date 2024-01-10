@@ -11,6 +11,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class ReplyResponse {
+	private Long id;
 	private Long feed_id;
 	private Long reply_id;
 	private Long user_id;
