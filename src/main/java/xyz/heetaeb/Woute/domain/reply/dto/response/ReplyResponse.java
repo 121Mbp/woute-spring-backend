@@ -13,9 +13,11 @@ import lombok.Getter;
 public class ReplyResponse {
 	private Long feed_id;
 	private Long reply_id;
+	private Long user_id;
 	private String nickname;
 	private String profileImage;
 	private String content;
 	private Integer heartCount;
 	private ZonedDateTime createdAt;
+	private Boolean userLiked;
 }

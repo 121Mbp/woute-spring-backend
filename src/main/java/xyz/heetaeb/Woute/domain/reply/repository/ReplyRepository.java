@@ -11,6 +11,8 @@ import xyz.heetaeb.Woute.domain.reply.entity.ReplyEntity;
 public interface ReplyRepository extends JpaRepository<ReplyEntity, Long>{
 	
 	public List<ReplyEntity> findByFeedId(Long feedId);
+	 
+	Optional<ReplyEntity> findByReplyIdAndUserId(Long replyId, Long userId);
 	
 	Optional<ReplyEntity> findByFeedIdAndId(Long feedId, Long id);
 	

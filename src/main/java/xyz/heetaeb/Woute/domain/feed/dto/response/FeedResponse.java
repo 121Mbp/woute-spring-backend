@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class FeedResponse {
     private Long id;
+    private Long userId;
     private String nickname;
     private String profileImage;
     private String type;
@@ -24,6 +25,7 @@ public class FeedResponse {
     private List<Tag> tags;
     private List<Attach> attaches;
     private List<Like> likes;
+    private Integer replyCount;
 
     @Getter
     @Builder

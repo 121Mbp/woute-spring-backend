@@ -2,18 +2,15 @@ package xyz.heetaeb.Woute.domain.follow.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import xyz.heetaeb.Woute.domain.user.entity.UserEntity;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
 
 @Builder
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "w_follows")
-@Entity
+@Entity(name = "w_follows")
 public class Follow {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "follow_seq")
@@ -22,11 +19,11 @@ public class Follow {
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "following_id")
-    private User following;
+    private UserEntity following;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "follower_id")
-    private User follower;
+    private UserEntity follower;
 
     private boolean followState;
     private ZonedDateTime createdAt;
