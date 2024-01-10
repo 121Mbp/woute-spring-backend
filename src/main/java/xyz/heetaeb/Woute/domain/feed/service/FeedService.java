@@ -21,6 +21,8 @@ import xyz.heetaeb.Woute.domain.feed.repository.*;
 import xyz.heetaeb.Woute.domain.notification.service.NotiService;
 import xyz.heetaeb.Woute.domain.reply.entity.ReplyEntity;
 import xyz.heetaeb.Woute.domain.reply.repository.ReplyRepository;
+import xyz.heetaeb.Woute.domain.user.entity.UserEntity;
+import xyz.heetaeb.Woute.domain.user.repository.UserRepository;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -43,6 +45,7 @@ public class FeedService {
     private final ReplyRepository replyRepository;
     private final NotiService notiService;
     private final AmazonS3Client amazonS3Client;
+    private final UserRepository userRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -94,12 +97,13 @@ public class FeedService {
             List<TagsEntity> hashtags = tagsRepository.findAllByFeedId(feedId);
             List<LikeEntity> likes = likeRepository.findAllByFeedId(feedId);
             List<ReplyEntity> reply = replyRepository.findByFeedId(feedId);
+            Optional<UserEntity> user = userRepository.findById(post.getUserId());
             int replyCount = reply.size();
             return FeedResponse.builder()
                     .id(post.getId())
                     .userId(post.getUserId())
-                    .nickname(post.getNickname())
-                    .profileImage(post.getProfileImage())
+                    .nickname(user.map(UserEntity::getNickname).orElse(null))
+                    .profileImage(user.map(UserEntity::getProfileImage).orElse(null))
                     .type(post.getType())
                     .title(post.getTitle())
                     .content(post.getContent())
@@ -121,12 +125,16 @@ public class FeedService {
                                     .build()).toList()
                     )
                     .likes(
-                            likes.stream().map(like -> FeedResponse.Like.builder()
-                                    .id(like.getId())
-                                    .userId(like.getUserId())
-                                    .nickname(like.getNickname())
-                                    .profileImage(like.getProfileImage())
-                                    .build()).toList()
+                            likes.stream().map(like -> {
+                                Optional<UserEntity> userLike = userRepository.findById(like.getUserId());
+
+                                return FeedResponse.Like.builder()
+                                        .id(like.getId())
+                                        .userId(like.getUserId())
+                                        .nickname(userLike.map(UserEntity::getNickname).orElse(null))
+                                        .profileImage(userLike.map(UserEntity::getProfileImage).orElse(null))
+                                        .build();
+                            }).toList()
                     )
                     .replyCount(replyCount)
                     .build();
@@ -139,11 +147,12 @@ public class FeedService {
         List<TagsEntity> hashtags = tagsRepository.findAllByFeedId(feedId);
         List<CourseEntity> courses = courseRepository.findAllByFeedId(feedId);
         List<AttachEntity> attaches = attachRepository.findAllByFeedId(feedId);
+        Optional<UserEntity> user = userRepository.findById(feed.getUserId());
         return CourseResponse.builder()
                 .id(feed.getId())
                 .userId(feed.getUserId())
-                .nickname(feed.getNickname())
-                .profileImage(feed.getProfileImage())
+                .nickname(user.map(UserEntity::getNickname).orElse(null))
+                .profileImage(user.map(UserEntity::getProfileImage).orElse(null))
                 .type(feed.getType())
                 .title(feed.getTitle())
                 .content(feed.getContent())
@@ -328,20 +337,21 @@ public class FeedService {
     @Transactional
     public void likeFeed(Long feedId, LikeRequest request) {
         FeedEntity feed = feedRepository.findById(feedId).orElseThrow();
+        Optional<UserEntity> user = userRepository.findById(request.getUserId());
         int increase = feed.getHeartCount() + 1;
         feed.changeFeedLike(increase);
         feedRepository.save(feed);
         notiService.send(feed.getUserId(),
-                request.getNickname(),
-                request.getProfileImage(),
+                user.map(UserEntity::getNickname).orElse(null),
+                user.map(UserEntity::getProfileImage).orElse(null),
                 "님이 게시글에 좋아요를 눌렀습니다.",
                 "/p/" + feed.getId(),
                 feed.getType());
         LikeEntity like = LikeEntity.builder()
                 .feedId(feed.getId())
                 .userId(request.getUserId())
-                .nickname(request.getNickname())
-                .profileImage(request.getProfileImage())
+                .nickname(user.map(UserEntity::getNickname).orElse(null))
+                .profileImage(user.map(UserEntity::getProfileImage).orElse(null))
                 .createdAt(ZonedDateTime.now())
                 .build();
         likeRepository.save(like);
