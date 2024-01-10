@@ -24,12 +24,14 @@ public class UserRequest {
 	private String password;
 	private String nickname;
 	private String provider;
+	private String profileImage;
 	
 	public UserEntity toUser(PasswordEncoder passwordEncoder) {
 		UserEntity userEntity = UserEntity.builder()
                 .email(email)
                 .password(passwordEncoder.encode(password))
                 .nickname(nickname)
+                .profileImage("https://woute-bucket.s3.ap-northeast-2.amazonaws.com/static/basicProfil.png")
                 .provider("woute")
                 .build();
         System.out.println("UserEntity: " + userEntity);

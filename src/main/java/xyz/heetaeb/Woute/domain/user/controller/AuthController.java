@@ -55,7 +55,7 @@ import xyz.heetaeb.Woute.domain.user.service.AuthService;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
-	private final String FOLDER_PATH = "C:\\Users\\A\\Pictures";
+	private final String FOLDER_PATH = "https://woute-bucket.s3.ap-northeast-2.amazonaws.com/";
 	@PersistenceContext
 	private EntityManager entityManager;
     private final AuthService authService;
@@ -146,6 +146,20 @@ public class AuthController {
                .contentLength(imageBytes.length)
                .body(resource);
    }
+//   @GetMapping("/user/file/{uuid}")
+//   public ResponseEntity<Resource> getImage(@PathVariable("uuid") String uuid) throws IOException {
+//       Path imagePath = Paths.get(FOLDER_PATH, uuid); // 이미지 파일 경로
+//
+//       byte[] imageBytes = Files.readAllBytes(imagePath);
+//
+//       ByteArrayResource resource = new ByteArrayResource(imageBytes);
+//       System.out.println("resource"+ resource);
+//       return ResponseEntity.ok()
+//               .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + uuid)
+//               .contentType(MediaType.IMAGE_PNG)
+//               .contentLength(imageBytes.length)
+//               .body(resource);
+//   }
 // @Operation(summary = "유저프로필 사진")
 // @GetMapping("user/file/{uuid}")
 // public ResponseEntity<?> userDownImage(@PathVariable("uuid")String uuid)throws IOException {
@@ -158,16 +172,14 @@ public class AuthController {
 //	 }
 // }
    
-   @GetMapping("/users/{id}")
-   public ResponseEntity<UserResponseDTO> userFeeds(@PathVariable("id") Long id) {
-	   return ResponseEntity.ok(authService.getUserFeed(id));
-   }
+  
    
  //프로필 등록
  	@PostMapping("/uploadprofileimage/{id}")
  	@Operation(summary="프로필 사진 등록")
      public ResponseEntity<UserResponse> uploadProfileImage(@RequestParam("file") MultipartFile file, @PathVariable("id") Long userId) {
          try {
+        	 System.out.println("받은파일명 : "+file);
              // AuthService를 사용하여 프로필 이미지 업로드 및 파일 이름 반환
              String uploadedFileName = authService.uploadProfileImage(file,userId);
              System.out.println("업로드 파일명 : " + uploadedFileName);
