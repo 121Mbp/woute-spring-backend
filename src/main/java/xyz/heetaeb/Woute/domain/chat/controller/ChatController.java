@@ -72,6 +72,11 @@ public class ChatController {
 		}
 	}                                                                                                                          
 	
+	/**
+	 * 안읽은 채팅방 읽음 처리
+	 * @param id
+	 * @param dto
+	 */
 	@PostMapping("/chat/{id}/read")
 	public void read(@PathVariable("id") Long id, @RequestBody ChatRequestDTO dto) {
 		chatService.isRead(id, dto.getRoomId());

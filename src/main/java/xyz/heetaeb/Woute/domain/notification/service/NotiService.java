@@ -27,10 +27,13 @@ public class NotiService {
 	private final NotiRepository notiRepository;
 	private final UserRepository userRepository;
 	
+	
+	// SSE 구독
 	public SseEmitter subscribe(Long id, String lastEventId) {
 		String userid = id + "_" +  System.currentTimeMillis();
 		log.info(userid);
 		
+		// userid key값으로 SSE 저장
 		SseEmitter emitter = emitterRepository.save(userid, new SseEmitter(60*1000L*60));
 		log.info("emitter : " + emitter);
 		try {
@@ -56,6 +59,7 @@ public class NotiService {
 		return emitter;
 	}
 
+	// 알림목록 조회
 	public List<NotiRespDTO> getList(Long id) {
 		return notiRepository.findByUserIdOrderByCreatedAtDesc(id).stream().map(noti -> NotiRespDTO.builder()
 				.id(noti.getId())
@@ -70,6 +74,7 @@ public class NotiService {
 				.build()).toList();
 	}
 	
+	// 알림 읽음처리
 	public void notiIsRead(Long id) {
 		List<Notification> notis = notiRepository.findByUserIdAndRead(id, false);
 		List<Notification> readNotis = notis.stream().map(noti -> Notification.builder()
@@ -86,7 +91,7 @@ public class NotiService {
 	}
 	
 	
-	
+	// 알림 전송(댓글, 좋아요, 팔로우)
 	@Transactional
 	public void send(Long userid, Long toUserId, String content, String url, String type) {
 		
@@ -108,6 +113,7 @@ public class NotiService {
         );
     }
 
+	// 알림 생성후 저장
 	private Notification creatNoti(Long id, Long toUserId,  String content, String url, String type) {
 		Notification notification = Notification.builder()
 				.userId(id)
@@ -121,6 +127,7 @@ public class NotiService {
 		return notiRepository.save(notification);
 	}
 	
+	// 해당 SSE 유저에게 전송
 	private void sendToClient(SseEmitter emitter, String id, Object data) {
 		try {
 			emitter.send(SseEmitter.event()

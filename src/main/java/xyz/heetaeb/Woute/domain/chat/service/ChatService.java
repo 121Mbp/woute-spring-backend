@@ -24,6 +24,7 @@ public class ChatService {
 	private final ChatMsgRepository chatMsgRepository;
 	private final UserRepository userRepository;
 	
+	// 채팅방 리스트 조회
 	@Transactional
 	public ChatListResponseDTO getList(Long id) {
 		List<JoinRoom> myRooms = joinRoomRepository.findByMyUserId(id);
@@ -33,7 +34,7 @@ public class ChatService {
 				.rooms(
 						myRooms.stream().map(room -> ChatListResponseDTO.Room.builder()
 								.toUserId(room.getToUserId())
-								.toUserNick(room.getToUserNick())
+								.toUserNick(userRepository.findById(room.getToUserId()).map(UserEntity::getNickname).orElse(null))
 								.toUserImg(userRepository.findById(room.getToUserId()).map(UserEntity::getProfileImage).orElse(null))
 								.roomId(room.getRoomId())
 								.isRead(room.getRead())
@@ -44,11 +45,13 @@ public class ChatService {
 				.build();
 	}
 	
+	// 메시지 전송시 데이터 저장
 	@Transactional
 	public void createRoom(ChatRequestDTO dto) {
 		UserEntity toUser = userRepository.findById(dto.getToUserId()).orElseThrow();
 		UserEntity fromUser = userRepository.findById(dto.getMyId()).orElseThrow();
 		
+		// 보낸 메시지 내용
 		ChatMsg msg = ChatMsg.builder()
 				.user(fromUser)
 				.content(dto.getMessage())
@@ -56,6 +59,7 @@ public class ChatService {
 				.createdAt(ZonedDateTime.now())
 				.build();
 		
+		// 받는 유저와 첫 대화일때 
 		if(joinRoomRepository.countByRoomId(dto.getRoomId()) != 2) {
 			JoinRoom myRoom = JoinRoom.builder()
 					.myUserId(dto.getMyId())
@@ -81,6 +85,7 @@ public class ChatService {
 					.build();
 			joinRoomRepository.save(toUserRoom);
 			chatMsgRepository.save(msg);
+			// 기존의 대화가 있을때
 		} else {
 			JoinRoom myRoom = joinRoomRepository.findByRoomIdAndMyUserId(dto.getRoomId(), dto.getMyId());
 			JoinRoom toUserRoom = joinRoomRepository.findByRoomIdAndMyUserId(dto.getRoomId(), dto.getToUserId());
@@ -117,7 +122,7 @@ public class ChatService {
 		
 	}
 
-	// 알림 읽기
+	// 채팅로그 조회
 	public ChatLogResponseDTO getRoom(Long roomId) {
 		List<ChatMsg> msgs = chatMsgRepository.findByRoomIdOrderByCreatedAtDesc(roomId);
 		ChatLogResponseDTO messages = ChatLogResponseDTO.builder()
@@ -134,6 +139,7 @@ public class ChatService {
 		return messages;
 	}
 		
+	// 알림 읽기
 	public void isRead(Long userId, Long roomId) {
 		JoinRoom room = joinRoomRepository.findByRoomIdAndMyUserId(roomId, userId);
 		JoinRoom updateRoom = room.builder()
