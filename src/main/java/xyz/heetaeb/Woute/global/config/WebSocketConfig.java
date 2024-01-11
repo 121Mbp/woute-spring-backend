@@ -10,6 +10,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+	// WebSocket connect endpoint 주소 http://localhost:8081/ws
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/ws")
@@ -17,6 +18,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 		.withSockJS();
 	}
 
+	// 구독 sub, 발송 pub
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.enableSimpleBroker("/sub");
