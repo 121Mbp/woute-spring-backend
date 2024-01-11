@@ -21,18 +21,32 @@ public class NotiController {
 	
 	private final NotiService notiService;
 	
-	
+	/**
+	 * SSE 연결
+	 * @param userid
+	 * @param lastEventId
+	 * @return
+	 */
 	@GetMapping(value = "/sub/{id}", produces = "text/event-stream")
 	public SseEmitter subscribe(@PathVariable("id") Long userid,
 			@RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId) {
 		return notiService.subscribe(userid, lastEventId);
 	}
 	
+	/**
+	 * 알림 목록 조회
+	 * @param id
+	 * @return
+	 */
 	@GetMapping("/noti/{id}")
 	public List<NotiRespDTO> getList(@PathVariable("id") Long id) {
 		return notiService.getList(id);
 	}
 	
+	/**
+	 * 알림 읽음 처리
+	 * @param dto
+	 */
 	@PostMapping("/noti")
 	public void notiIsRead(@RequestBody ChatRequestDTO dto) {
 		notiService.notiIsRead(dto.getMyId());

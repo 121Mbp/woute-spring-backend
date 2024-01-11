@@ -31,6 +31,7 @@ public class FollowService {
         UserEntity followerUser = userRepository.findById(dto.getFollowerId())
         		.orElseThrow();
         
+        	// 상대방이 나를 팔로우 한 상태일때 상대방 followState true로 전환
         	if(followRepository.countByFollowingIdAndFollowerId(dto.getFollowerId(), dto.getFollowingId()) == 1) {
         		Follow fromFollow = followRepository.findByFollowingIdAndFollowerId(dto.getFollowerId(), dto.getFollowingId());
         		fromFollow  = Follow.builder()
@@ -50,12 +51,14 @@ public class FollowService {
         				.build();
         		followRepository.save(tooFollow);
         		
+        		// 팔로우 알림 전송
         		notiService.send(tooFollow.getFollower().getId(),
         				tooFollow.getFollowing().getId(),
         				"님이 팔로우 했습니다",
         				"/users/" + tooFollow.getFollowing().getId(),
         				"follow");
         	} else {
+        		// 상대방 팔로우가 없을 경우
         		Follow follow = Follow.builder()
         				.following(followingUser)
         				.follower(followerUser)
@@ -63,6 +66,7 @@ public class FollowService {
         				.createdAt(ZonedDateTime.now())
         				.build();
         		followRepository.save(follow);
+        		// 팔로우 알림 전송
         		notiService.send(
         				follow.getFollower().getId(),
         				follow.getFollowing().getId(),
@@ -76,6 +80,7 @@ public class FollowService {
     public void unFollow(Long id) {
     	Follow follow = followRepository.findById(id).orElseThrow();
     	
+    	// 맞팔로우 상태에서 언팔할때 다른 한쪽 followStata false 전환
     	if(followRepository.countByFollowingIdAndFollowerId(follow.getFollower().getId(), follow.getFollowing().getId()) == 1) {
     		Follow fromFollow = followRepository.findByFollowingIdAndFollowerId(follow.getFollower().getId(), follow.getFollowing().getId());
     		fromFollow  = Follow.builder()
@@ -134,6 +139,7 @@ public class FollowService {
     public List<SimpleFollowerListDTO> searchFollower(Long userId, Long myId , String nickname) {
     	List<Follow> followers = followRepository.findByFollowerId(userId);
     	
+    	// 검색어 공백일때 결과 없음
     	if(nickname.trim().equals("")) {
     		return followers.stream().filter(follower -> follower.getFollowing().getNickname().contains("가"))
     				.map(f -> SimpleFollowerListDTO.builder()
@@ -145,6 +151,7 @@ public class FollowService {
     						.CreatedAt(f.getCreatedAt())
     						.build()).toList();
     	} else {
+    		// 검색어 검색
         	return followers.stream().filter(follower -> follower.getFollowing().getNickname().contains(nickname.trim()))
     		    	.map(f -> SimpleFollowerListDTO.builder()
     		    			.id(f.getId())
@@ -195,35 +202,6 @@ public class FollowService {
     	
     }
     
-    
-    // 팔로워 검색
-    public List<SimpleFollowerListDTO> searchFollower(Long userid, String nickname) {
-    	List<Follow> followers = followRepository.findByFollowerId(userid);
-    	
-    	// 검색어 공백일때 결과 없음
-    	if(nickname.trim().equals("")) {
-    		return followers.stream().filter(follower -> follower.getFollowing().getNickname().contains("가"))
-    				.map(f -> SimpleFollowerListDTO.builder()
-    						.id(f.getId())
-    						.followerId(f.getFollowing().getId())
-    						.followerNick(f.getFollowing().getNickname())
-    						.followerImg(f.getFollowing().getProfileImage())
-    						.followState(f.isFollowState())
-    						.CreatedAt(f.getCreatedAt())
-    						.build()).toList();
-    	} else {
-    		// 검색어 검색
-        	return followers.stream().filter(follower -> follower.getFollowing().getNickname().contains(nickname.trim()))
-    		    	.map(f -> SimpleFollowerListDTO.builder()
-    		    			.id(f.getId())
-    		    			.followerId(f.getFollowing().getId())
-    		    			.followerNick(f.getFollowing().getNickname())
-    		    			.followerImg(f.getFollowing().getProfileImage())
-    		    			.followState(f.isFollowState())
-    		    			.CreatedAt(f.getCreatedAt())
-    		    			.build()).toList();
-    	}
-    }
 
     /**
      * 유저 페이지에서 언팔할때 follow_id가 없어서 단일조회 후 id 값 추출
