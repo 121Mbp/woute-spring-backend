@@ -19,6 +19,7 @@ import xyz.heetaeb.Woute.domain.search.service.SearchService;
 public class SearchController {
 	private final SearchService searchService;
 	
+	// 검색 목록(유저, 태그)
 	@PostMapping("/search")
 	public SearchResponseDTO search(@RequestBody KeywordRequest dto) {
 		System.out.println("keyword : " + dto.getKeyword());
@@ -26,6 +27,7 @@ public class SearchController {
 		return searchService.search(dto.getKeyword());
 	}
 	
+	// 선택된 태그 검색 결과페이지
 	@GetMapping("/search/tags/{keyword}")
 	public List<SearchResultDTO> getResult(@PathVariable("keyword") String keyword) {
 		return searchService.toResultPage(keyword);
