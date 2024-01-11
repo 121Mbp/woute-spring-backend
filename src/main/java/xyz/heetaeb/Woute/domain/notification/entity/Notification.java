@@ -26,9 +26,7 @@ public class Notification {
 	
 	private Long userId;
 	
-	private String nickname;
-	
-	private String profileImg;
+	private Long toUserId;
 	
 	private String content;
 	
