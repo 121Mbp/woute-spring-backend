@@ -32,8 +32,8 @@ public class NotiRespDTO {
 		return new NotiRespDTO(
 				notification.getId(), 
 				notification.getUserId(), 
-				notification.getNickname(),
-				notification.getProfileImg(),
+				notification.getType(),
+				notification.getType(),
 				notification.getContent(), 
 				notification.getSenderUrl(), 
 				notification.getType(),

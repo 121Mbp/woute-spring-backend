@@ -15,6 +15,8 @@ import xyz.heetaeb.Woute.domain.notification.dto.NotiRespDTO;
 import xyz.heetaeb.Woute.domain.notification.entity.Notification;
 import xyz.heetaeb.Woute.domain.notification.repository.EmitterRepository;
 import xyz.heetaeb.Woute.domain.notification.repository.NotiRepository;
+import xyz.heetaeb.Woute.domain.user.entity.UserEntity;
+import xyz.heetaeb.Woute.domain.user.repository.UserRepository;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class NotiService {
 
 	private final EmitterRepository emitterRepository;
 	private final NotiRepository notiRepository;
+	private final UserRepository userRepository;
 	
 	public SseEmitter subscribe(Long id, String lastEventId) {
 		String userid = id + "_" +  System.currentTimeMillis();
@@ -57,8 +60,8 @@ public class NotiService {
 		return notiRepository.findByUserIdOrderByCreatedAtDesc(id).stream().map(noti -> NotiRespDTO.builder()
 				.id(noti.getId())
 				.userId(noti.getUserId())
-				.nickname(noti.getNickname())
-				.profileImg(noti.getProfileImg())
+				.nickname(userRepository.findById(noti.getToUserId()).map(UserEntity::getNickname).orElse(null))
+				.profileImg(userRepository.findById(noti.getToUserId()).map(UserEntity::getProfileImage).orElse(null))
 				.content(noti.getContent())
 				.senderUrl(noti.getSenderUrl())
 				.type(noti.getType())
@@ -72,8 +75,7 @@ public class NotiService {
 		List<Notification> readNotis = notis.stream().map(noti -> Notification.builder()
 				.id(noti.getId())
 				.userId(noti.getUserId())
-				.nickname(noti.getNickname())
-				.profileImg(noti.getProfileImg())
+				.toUserId(noti.getToUserId())
 				.content(noti.getContent())
 				.senderUrl(noti.getSenderUrl())
 				.type(noti.getType())
@@ -86,9 +88,9 @@ public class NotiService {
 	
 	
 	@Transactional
-	public void send(Long userid, String nickname, String profileImg, String content, String url, String type) {
+	public void send(Long userid, Long toUserId, String content, String url, String type) {
 		
-        Notification notification = creatNoti(userid, nickname, profileImg, content, url, type);
+        Notification notification = creatNoti(userid, toUserId, content, url, type);
         String id = String.valueOf(userid);
         
         // 로그인 한 유저의 SseEmitter 모두 가져오기
@@ -106,11 +108,10 @@ public class NotiService {
         );
     }
 
-	private Notification creatNoti(Long id, String nickname, String profileImg,  String content, String url, String type) {
+	private Notification creatNoti(Long id, Long toUserId,  String content, String url, String type) {
 		Notification notification = Notification.builder()
 				.userId(id)
-				.nickname(nickname)
-				.profileImg(profileImg)
+				.toUserId(toUserId)
 				.content(content)
 				.senderUrl(url)
 				.type(type)
