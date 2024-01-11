@@ -26,8 +26,8 @@ jobs:
   build:
 
     # Github의 워크플로에서 실행될 OS 선택
-    #runs-on: ubuntu-latest
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    #runs-on: self-hosted
 
     steps:
       - name: Checkout
