@@ -51,8 +51,7 @@ public class FollowService {
         		followRepository.save(tooFollow);
         		
         		notiService.send(tooFollow.getFollower().getId(),
-        				tooFollow.getFollowing().getNickname(),
-        				tooFollow.getFollowing().getProfileImage(),
+        				tooFollow.getFollowing().getId(),
         				"님이 팔로우 했습니다",
         				"/users/" + tooFollow.getFollowing().getId(),
         				"follow");
@@ -66,8 +65,7 @@ public class FollowService {
         		followRepository.save(follow);
         		notiService.send(
         				follow.getFollower().getId(),
-        				follow.getFollowing().getNickname(),
-        				follow.getFollowing().getProfileImage(), 
+        				follow.getFollowing().getId(),
         				"님이 팔로우 했습니다", 
         				"/users/" + follow.getFollowing().getId(),
         				"follow");

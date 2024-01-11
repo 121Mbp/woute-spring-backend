@@ -341,12 +341,15 @@ public class FeedService {
         int increase = feed.getHeartCount() + 1;
         feed.changeFeedLike(increase);
         feedRepository.save(feed);
-        notiService.send(feed.getUserId(),
-                user.map(UserEntity::getNickname).orElse(null),
-                user.map(UserEntity::getProfileImage).orElse(null),
-                "님이 게시글에 좋아요를 눌렀습니다.",
-                "/p/" + feed.getId(),
-                feed.getType());
+        
+        // 게시글 좋아요 알림(자신 제외)
+        if(feed.getUserId() != request.getUserId()) {
+        	notiService.send(feed.getUserId(),
+        			request.getUserId(),
+        			"님이 게시글에 좋아요를 눌렀습니다.",
+        			"/p/" + feed.getId(),
+        			feed.getType());
+        }
         LikeEntity like = LikeEntity.builder()
                 .feedId(feed.getId())
                 .userId(request.getUserId())
