@@ -28,14 +28,13 @@ public class ChatService {
 	public ChatListResponseDTO getList(Long id) {
 		List<JoinRoom> myRooms = joinRoomRepository.findByMyUserId(id);
 		UserEntity user = userRepository.findById(id).orElseThrow();
-
 		return ChatListResponseDTO.builder()
 				.myUser(user)
 				.rooms(
 						myRooms.stream().map(room -> ChatListResponseDTO.Room.builder()
 								.toUserId(room.getToUserId())
 								.toUserNick(room.getToUserNick())
-								.toUserImg(room.getToUserImg())
+								.toUserImg(userRepository.findById(room.getToUserId()).map(UserEntity::getProfileImage).orElse(null))
 								.roomId(room.getRoomId())
 								.isRead(room.getRead())
 								.lastMsg(room.getLastMsg())
