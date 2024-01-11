@@ -84,7 +84,7 @@ public class ReplyService {
 		FeedEntity feed = feedRepository.findById(request.getFeed_id()).orElseThrow();
 		Optional<UserEntity> user = userRepository.findById(request.getUser_id());
 		
-		ReplyEntity repley = ReplyEntity.builder()
+		ReplyEntity reply = ReplyEntity.builder()
 				.feedId(request.getFeed_id())
 				.userId(request.getUser_id())
 				.nickname(user.map(UserEntity::getNickname).orElse(null))
@@ -93,9 +93,16 @@ public class ReplyService {
 				.heartCount(request.getHeartCount())
 				.created_at(ZonedDateTime.now())
 				.build();
-		replyRepository.save(repley);
-		notiService.send(request.getUser_id(), user.map(UserEntity::getNickname).orElse(null), user.map(UserEntity::getProfileImage).orElse(null)
-				,"님이 댓글을 작성했습니다.", "/p/"+ feed.getId(), feed.getType());
+		replyRepository.save(reply);
+		
+		// 댓글 등록 알림(자신 제외)
+		if(feed.getUserId() != request.getUser_id()) {
+			notiService.send(feed.getUserId(),
+					request.getUser_id()
+					,"님이 댓글을 작성했습니다.", 
+					"/p/"+ feed.getId(), 
+					feed.getType());
+		}
 
 		
 	}
@@ -112,6 +119,7 @@ public class ReplyService {
 	 //댓글좋아요
 	 @Transactional
 	 public void replyLike(Long feed_id, Long reply_id,ReplyLikeRequest request) {
+		FeedEntity feed = feedRepository.findById(feed_id).orElseThrow();
 		 ReplyEntity reply = replyRepository.findByFeedIdAndId(feed_id, reply_id).orElseThrow();
 		 int increase = reply.getHeartCount() + 1;
 		 reply.changeFeedLike(increase);
@@ -123,10 +131,14 @@ public class ReplyService {
 				 .build();
 				 likeRepository.save(like);
 				 
-				 
-				 
-//				 notiService.send(request.getUserId(), request.getNickname(), request.getProfileImage()
-//						 ,"님이 좋아요를 눌렀습니다." , "/p/"+ request.getUserId());
+				 // 댓글 좋아요 알림(자신 제외)
+				 if(reply.getUserId() != request.getUserId()) {
+					 notiService.send(reply.getUserId(), 
+							 request.getUserId(),
+							 "님이 댓글에 좋아요를 눌렀습니다." ,
+							 "/p/"+ feed_id,
+							 feed.getType());
+				 }
 	}
 	 
 	 
