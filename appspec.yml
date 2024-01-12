@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 
 files:
-  - source: /spring
+  - source: /
     destination: /home/ec2-user/project/_work/project/woute-spring-backend/woute-spring-backend
     overwrite: yes
 
