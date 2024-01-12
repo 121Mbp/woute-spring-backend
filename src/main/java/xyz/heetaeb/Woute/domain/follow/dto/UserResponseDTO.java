@@ -24,6 +24,7 @@ import xyz.heetaeb.Woute.domain.user.entity.UserEntity;
 @NoArgsConstructor
 public class UserResponseDTO {
 	private Long id;
+	private Long roomId;
 	private String nickname;
 	private String introduction;
 	private String ProfileImage;
