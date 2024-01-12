@@ -56,7 +56,7 @@ public class SearchService {
 							).build();
 		} else if(keyword.trim().equals("")) {
 			System.out.println("공백");
-			List<UserEntity> users = userRepository.findByNicknameContaining("가");
+			List<UserEntity> users = userRepository.findByNicknameContaining("&");
 			return SearchResponseDTO.builder()
 					.users(
 							users.stream().map(user -> SearchResponseDTO.User.builder()
