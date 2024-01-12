@@ -56,7 +56,7 @@ jobs:
           aws deploy push \
             --application-name ${{ env.CODE_DEPLOY_APP_NAME }} \
             --ignore-hidden-files \
-            --s3-location s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip \
+            --s3-location s3://$BUCKET_NAME/$GITHUB_SHA.zip \
             --source .
             
       # S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행
@@ -65,6 +65,6 @@ jobs:
           aws deploy create-deployment \
             --application-name ${{ env.CODE_DEPLOY_APP_NAME }} \
             --deployment-config-name CodeDeployDefault.AllAtOnce \
-            --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-            --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
+            --deployment-group-name ${{ env.DEPLOYMENT_GROUP_NAME }} \
+            --s3-location bucket=$BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
 
