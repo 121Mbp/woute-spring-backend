@@ -5,7 +5,7 @@ files:
   - source: /
     destination: /home/ec2-user/project/_work/woute-spring-backend/woute-spring-backend
     overwrite: yes
-
+file_exists_behavior: OVERWRITE
 permissions:
   - object: /
     pattern: "**"
