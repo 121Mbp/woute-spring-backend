@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PROJECT_ROOT="/home/ec2-user/project/_work/woute-spring-backend/woute-spring-backend"
+PROJECT_ROOT="/home/ec2-user/project"
 JAR_FILE="$PROJECT_ROOT/Woute.jar"
 
 DEPLOY_LOG="$PROJECT_ROOT/deploy.log"
