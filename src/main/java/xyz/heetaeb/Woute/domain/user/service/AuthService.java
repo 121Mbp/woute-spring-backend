@@ -27,6 +27,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import xyz.heetaeb.Woute.domain.chat.entity.JoinRoom;
+import xyz.heetaeb.Woute.domain.chat.repository.JoinRoomRepository;
 import xyz.heetaeb.Woute.domain.feed.dto.response.FeedResponse;
 import xyz.heetaeb.Woute.domain.feed.entity.AttachEntity;
 import xyz.heetaeb.Woute.domain.feed.service.FeedService;
@@ -58,7 +60,7 @@ public class AuthService {
     private final TokenProvider tokenProvider;
     private final FollowRepository followRepository;
     private final FeedService feedService;
-    
+    private final JoinRoomRepository joinRoomRepository;
     
     
     public List<UserEntity> selectAll(){
@@ -281,26 +283,43 @@ public class AuthService {
         // UUID를 이용하여 고유한 파일 이름 생성
         return UUID.randomUUID().toString() + extension;
     }
+    
     @Transactional
     public UserResponseDTO getUserFeed(Long id, Long myId) {
         UserEntity user = userRepository.findById(id).orElseThrow();
         Long followerCount = followRepository.countByFollowerId(id);
         Long followingCount = followRepository.countByFollowingId(id);
         List<FeedResponse> feeds = feedService.userFeeds(id);
+        JoinRoom room = joinRoomRepository.findByMyUserIdAndToUserId(myId, id);
         // 로그인 아이디값 가져오기
         Long hasFollowed = followRepository.countByFollowingIdAndFollowerId(myId, id);
-        System.out.println("hasFollowed: " + hasFollowed);
-        return UserResponseDTO.builder()
-                .id(user.getId())
-                .nickname(user.getNickname())
-                .introduction(user.getIntroduction())
-                .ProfileImage(user.getProfileImage())
-                .feedsCount(Long.valueOf(feeds.size()))
-                .followerCount(followerCount)
-                .followingCount(followingCount)
-                .hasFollowed(hasFollowed == 1 ? true : false)
-                .feeds(feeds)
-                .build();
+        if(room != null) {
+        	return UserResponseDTO.builder()
+        			.id(user.getId())
+        			.roomId(room.getRoomId())
+        			.nickname(user.getNickname())
+        			.introduction(user.getIntroduction())
+        			.ProfileImage(user.getProfileImage())
+        			.feedsCount(Long.valueOf(feeds.size()))
+        			.followerCount(followerCount)
+        			.followingCount(followingCount)
+        			.hasFollowed(hasFollowed == 1 ? true : false)
+        			.feeds(feeds)
+        			.build();
+        } else {
+        	return UserResponseDTO.builder()
+        			.id(user.getId())
+        			.nickname(user.getNickname())
+        			.introduction(user.getIntroduction())
+        			.ProfileImage(user.getProfileImage())
+        			.feedsCount(Long.valueOf(feeds.size()))
+        			.followerCount(followerCount)
+        			.followingCount(followingCount)
+        			.hasFollowed(hasFollowed == 1 ? true : false)
+        			.feeds(feeds)
+        			.build();
+        	
+        }
     }
     
     @Transactional
