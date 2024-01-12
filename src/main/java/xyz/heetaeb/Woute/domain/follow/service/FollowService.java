@@ -174,7 +174,7 @@ public class FollowService {
     	
     	// 검색어 공백일때 결과 없음
     	if(nickname.trim().equals("")) {
-    		return followings.stream().filter(following -> following.getFollower().getNickname().contains("가"))
+    		return followings.stream().filter(following -> following.getFollower().getNickname().contains("^%"))
     				.map(f -> SimpleFollowingListDTO.builder()
     						.id(f.getId())
     						.followingId(f.getFollower().getId())
