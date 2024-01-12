@@ -12,5 +12,7 @@ public interface JoinRoomRepository extends JpaRepository<JoinRoom, Long> {
 	JoinRoom findByRoomIdAndMyUserId(Long roomid, Long userid);
 	
 	Long countByRoomId(Long roomid);
-	
+
+	JoinRoom findByMyUserIdAndToUserId(Long myId, Long userId);
+
 }
