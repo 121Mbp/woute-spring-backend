@@ -11,6 +11,9 @@ on:
   push:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+  
 env:
   PROJECT_NAME: woute-spring-backend
   BUCKET_NAME: woute-bucket
@@ -18,7 +21,7 @@ env:
   DEPLOYMENT_GROUP_NAME: woute-project-deployment-group
   
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,8 +35,7 @@ jobs:
 
       # gradlew 파일 실행권한 설정
       - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
-        shell: bash
+        run: chmod +x gradlew
 
       # Gradle build (Test 제외)
       - name: Build with Gradle
