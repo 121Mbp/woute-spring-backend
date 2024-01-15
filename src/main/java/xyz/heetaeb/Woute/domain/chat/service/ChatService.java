@@ -27,7 +27,7 @@ public class ChatService {
 	// 채팅방 리스트 조회
 	@Transactional
 	public ChatListResponseDTO getList(Long id) {
-		List<JoinRoom> myRooms = joinRoomRepository.findByMyUserId(id);
+		List<JoinRoom> myRooms = joinRoomRepository.findByMyUserIdOrderByLastMsgTime(id);
 		UserEntity user = userRepository.findById(id).orElseThrow();
 		return ChatListResponseDTO.builder()
 				.myUser(user)
