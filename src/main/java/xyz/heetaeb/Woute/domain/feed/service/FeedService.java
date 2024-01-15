@@ -52,7 +52,7 @@ public class FeedService {
 
     // 피드 리스트
     public List<FeedResponse> feedList() {
-        List<FeedEntity> feeds = feedRepository.findAll();
+        List<FeedEntity> feeds = feedRepository.findAllOrderByCreatedAt();
         return dataList(feeds);
     }
 

@@ -17,4 +17,5 @@ public interface FeedRepository extends JpaRepository<FeedEntity, Long> {
     public List<FeedEntity> findByUserIdAndType(Long userId, String type);
     public List<FeedEntity> findByType(String type);
     public List<FeedEntity> findByUserId(Long userId);
+    public List<FeedEntity> findAllOrderByCreatedAt();
 }
