@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,7 +53,7 @@ public class FeedService {
 
     // 피드 리스트
     public List<FeedResponse> feedList() {
-        List<FeedEntity> feeds = feedRepository.findAllOrderByCreatedAtDesc();
+        List<FeedEntity> feeds = feedRepository.findAll(Sort.by("createdAt").descending());
         return dataList(feeds);
     }
 
