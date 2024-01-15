@@ -17,6 +17,12 @@
 ![Static Badge](https://img.shields.io/badge/jjwt-0.11.2-green)
 ![Static Badge](https://img.shields.io/badge/SwaggerUI-2.0.2-green)
 
+![Static Badge](https://img.shields.io/badge/React-18.2.0-green)
+![Static Badge](https://img.shields.io/badge/Axios-1.6.3-green)
+
+## 링크
+http://3.36.219.193
+
 
 ## 일정 (2023. 12. 08 ~ 2014. 01. 12)
 <details>
@@ -49,7 +55,6 @@
 </details>
 
 
-
 ## 주요기능
 #### - [기능 명세서](https://longing-anorak-f8d.notion.site/842a3c162b11444cadb4b8df288ed331)
 #### - 반응형으로 제작
@@ -59,11 +64,12 @@
 #### - 피드에 리뷰 및 댓글 남기고 좋아요 기능
 #### - 작성한 내용에서 # 문구만 자동으로 필터하여 해시태그로 등록 
 #### - 유저 간의 팔로우 / 팔로잉
-#### - 인피니티(Observe API) 스크롤
-#### - SSH로 좋아요 및 팔로우시 실시간 알림 구현
-#### - JWT로 회원 관리
+#### - Observe API를 활용한 인피니티 스크롤 구현
+#### - SSE로 좋아요 및 팔로우시 실시간 알림 구현
+#### - JWT(Java Web Token)으로 회원 관리
 #### - 웹소켓을 활용한 1:1 채팅
 #### - 피드 등록 시 드래그 앤 드롭으로 코스 리스트 위치 변경 가능
+#### - browser-image-compression 라이브러리로 이미지 최적화 
 
 
 ## API 
@@ -74,6 +80,8 @@
 ## DB 명세서
 #### - [DB 명세서](https://dbdiagram.io/d/woute-6576c54756d8064ca0c5d313)
 
+<img width="1081" alt="스크린샷 2024-01-15 오후 8 51 36" src="https://github.com/121Mbp/woute-spring-backend/assets/11451648/bb742aed-6d75-49b0-bf34-92235107c523">
+
 
 ## 디자인
 #### - [Figma](https://www.figma.com/file/8iwfRwvip10JUyIMfvdBeP/Untitled?type=design&node-id=0%3A1&mode=design&t=hZsNY8zI1ZsSFuz2-1)
@@ -83,7 +91,7 @@
 
 ###### add: 새로운 기능 추가
 ###### fix: 버그 수정
-###### modify: 문서 수정
+###### edit: 문서 수정
 ###### remove: 문서 삭제 및 기능 삭제
 ###### style: 코드 포맷팅, 세미콜론 누락, 코드 변경이 없는 경우
 ###### refactor: 코드 리펙토링
