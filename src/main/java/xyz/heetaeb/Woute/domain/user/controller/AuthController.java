@@ -102,7 +102,7 @@ public class AuthController {
 	   }
  
    @Operation(summary = "토큰 유저정보")
-   @PostMapping("/userinfosave")
+   @PostMapping("/userinfosave/{id}")
    public ResponseEntity<UserEntity> userInfoSave(@RequestParam("id") Long id) {
        System.out.println("토큰에 있는 id: " + id);
        System.out.println(authService.findById(id));
