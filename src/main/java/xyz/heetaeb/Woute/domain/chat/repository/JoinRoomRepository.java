@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import xyz.heetaeb.Woute.domain.chat.entity.JoinRoom;
 
 public interface JoinRoomRepository extends JpaRepository<JoinRoom, Long> {
-	List<JoinRoom> findByMyUserId(Long userid);
+	List<JoinRoom> findByMyUserIdOrderByLastMsgTime(Long userid);
 	
 	JoinRoom findByRoomIdAndMyUserId(Long roomid, Long userid);
 	
