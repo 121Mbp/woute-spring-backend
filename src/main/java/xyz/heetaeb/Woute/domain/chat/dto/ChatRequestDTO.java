@@ -15,4 +15,6 @@ public class ChatRequestDTO {
 	private String message;
 	
 	private ZonedDateTime lastMsgTime;
+	
+	private String nickName;
 }

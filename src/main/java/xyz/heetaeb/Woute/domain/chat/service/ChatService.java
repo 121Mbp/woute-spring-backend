@@ -10,10 +10,12 @@ import lombok.RequiredArgsConstructor;
 import xyz.heetaeb.Woute.domain.chat.dto.ChatListResponseDTO;
 import xyz.heetaeb.Woute.domain.chat.dto.ChatLogResponseDTO;
 import xyz.heetaeb.Woute.domain.chat.dto.ChatRequestDTO;
+import xyz.heetaeb.Woute.domain.chat.dto.FindUserListDTO;
 import xyz.heetaeb.Woute.domain.chat.entity.ChatMsg;
 import xyz.heetaeb.Woute.domain.chat.entity.JoinRoom;
 import xyz.heetaeb.Woute.domain.chat.repository.ChatMsgRepository;
 import xyz.heetaeb.Woute.domain.chat.repository.JoinRoomRepository;
+import xyz.heetaeb.Woute.domain.search.dto.SearchResponseDTO;
 import xyz.heetaeb.Woute.domain.user.entity.UserEntity;
 import xyz.heetaeb.Woute.domain.user.repository.UserRepository;
 
@@ -155,5 +157,27 @@ public class ChatService {
 				.build();
 		joinRoomRepository.save(updateRoom);
 	}
+
+	// 채팅 유저찾기
+	public FindUserListDTO search(Long myId, String nickName) {
+		if(nickName.trim().equals("")) {
+			return FindUserListDTO.builder().users(null).build();
+		} else {
+			List<UserEntity> users = userRepository.findByNicknameContaining(nickName.trim());
+			return FindUserListDTO.builder()
+					.users(
+							users.stream().map(user -> FindUserListDTO.User.builder()
+									.userId(user.getId())
+									.roomId(
+											joinRoomRepository.findByMyUserIdAndToUserId(myId, user.getId()) != null ?
+													joinRoomRepository.findByMyUserIdAndToUserId(myId, user.getId()).getRoomId() : null 
+											)
+									.profileImg(user.getProfileImage())
+									.nickName(user.getNickname())
+									.build()
+									).toList()
+							).build();
+			}
+		}
 	
 }
