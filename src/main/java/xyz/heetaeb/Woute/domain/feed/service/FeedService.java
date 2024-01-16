@@ -148,6 +148,7 @@ public class FeedService {
         List<TagsEntity> hashtags = tagsRepository.findAllByFeedId(feedId);
         List<CourseEntity> courses = courseRepository.findAllByFeedId(feedId);
         List<AttachEntity> attaches = attachRepository.findAllByFeedId(feedId);
+        List<LikeEntity> likese = likeRepository.findAllByFeedId(feedId);
         Optional<UserEntity> user = userRepository.findById(feed.getUserId());
         return CourseResponse.builder()
                 .id(feed.getId())
@@ -179,6 +180,18 @@ public class FeedService {
                                 .longitude(places.getLongitude())
                                 .build()
                         ).toList()
+                )
+                .likes(
+                        likese.stream().map(like -> {
+                            Optional<UserEntity> userLike = userRepository.findById(like.getUserId());
+
+                            return CourseResponse.Like.builder()
+                                    .id(like.getId())
+                                    .userId(like.getUserId())
+                                    .nickname(userLike.map(UserEntity::getNickname).orElse(null))
+                                    .profileImage(userLike.map(UserEntity::getProfileImage).orElse(null))
+                                    .build();
+                        }).toList()
                 )
                 .attaches(
                         attaches.stream().map(images -> CourseResponse.Attach.builder()
