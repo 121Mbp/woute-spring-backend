@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import xyz.heetaeb.Woute.domain.chat.dto.ChatListResponseDTO;
 import xyz.heetaeb.Woute.domain.chat.dto.ChatLogResponseDTO;
 import xyz.heetaeb.Woute.domain.chat.dto.ChatRequestDTO;
+import xyz.heetaeb.Woute.domain.chat.dto.FindUserListDTO;
 import xyz.heetaeb.Woute.domain.chat.service.ChatService;
 
 @RequiredArgsConstructor
@@ -80,5 +81,16 @@ public class ChatController {
 	@PostMapping("/chat/{id}/read")
 	public void read(@PathVariable("id") Long id, @RequestBody ChatRequestDTO dto) {
 		chatService.isRead(id, dto.getRoomId());
+	}
+	
+	/**
+	 * 채팅 유저검색
+	 * @param dto
+	 * @return
+	 */
+	@PostMapping("/chat/user")
+	public FindUserListDTO search(@RequestBody ChatRequestDTO dto) {
+		System.out.println("nick : " + dto.getNickName());
+		return chatService.search(dto.getMyId(), dto.getNickName());
 	}
 }
