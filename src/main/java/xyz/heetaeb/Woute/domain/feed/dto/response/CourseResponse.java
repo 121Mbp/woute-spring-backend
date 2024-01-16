@@ -25,6 +25,7 @@ public class CourseResponse {
     private ZonedDateTime updatedAt;
     private List<Course> courses;
     private List<Attach> attaches;
+    private List<Like> likes;
     private List<Tag> tags;
 
     @Getter
@@ -58,5 +59,15 @@ public class CourseResponse {
         private String origin;
         private String type;
         private String filePath;
+    }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    public static class Like {
+        private Long id;
+        private Long userId;
+        private String nickname;
+        private String profileImage;
     }
 }
