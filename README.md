@@ -10,15 +10,15 @@
 ![Static Badge](https://img.shields.io/badge/springboot-3.2.1-green)
 ![Static Badge](https://img.shields.io/badge/gradle-8.5-green)
 ![Static Badge](https://img.shields.io/badge/jpa-3.2.1-green)
-![Static Badge](https://img.shields.io/badge/HikariCP-5.0.1-green)
+![Static Badge](https://img.shields.io/badge/Hibernate-6.0.6-green)
 ![Static Badge](https://img.shields.io/badge/SpringSecurity-6.1.2-green)
 ![Static Badge](https://img.shields.io/badge/ojdbc11-23.3.0.23.09-green)
 ![Static Badge](https://img.shields.io/badge/websocket-6.1.2-green)
 ![Static Badge](https://img.shields.io/badge/jjwt-0.11.2-green)
 ![Static Badge](https://img.shields.io/badge/SwaggerUI-2.0.2-green)
 
-![Static Badge](https://img.shields.io/badge/React-18.2.0-green)
-![Static Badge](https://img.shields.io/badge/Axios-1.6.3-green)
+![Static Badge](https://img.shields.io/badge/React-18.2.0-blue)
+![Static Badge](https://img.shields.io/badge/Axios-1.6.3-blue)
 
 ## 링크
 http://3.36.219.193
