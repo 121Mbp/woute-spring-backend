@@ -20,7 +20,10 @@
 ![Static Badge](https://img.shields.io/badge/React-18.2.0-blue)
 ![Static Badge](https://img.shields.io/badge/Axios-1.6.3-blue)
 
+
 ## 링크
+[발표 PPT](https://github.com/121Mbp/woute-spring-backend/files/14001736/bts2woute_final.pdf)
+
 http://3.36.219.193
 
 
